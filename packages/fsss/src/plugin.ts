@@ -1,3 +1,6 @@
+import type { Dirent } from "node:fs";
+import { readdir } from "node:fs/promises";
+import { join } from "node:path";
 import type {
   Extensions,
   Middleware,
@@ -5,6 +8,9 @@ import type {
   PluginContext,
   PluginSetup,
 } from "./types";
+
+const PLUGINS_DIR_NAME = "_plugins";
+const PLUGIN_FILE_EXTENSION = ".ts";
 
 interface ResolvedPlugins {
   extensions: Extensions;
@@ -54,5 +60,43 @@ function buildMiddlewareChain(
   return chain;
 }
 
-export { buildMiddlewareChain, definePlugin, resolvePlugins };
+// traversedDirs の各ディレクトリから _plugins/ をスキャンし、プラグインを自動登録する
+// root → leaf の順で適用（外側のミドルウェアが先に実行される）
+async function scanPluginsAlongPath(
+  traversedDirs: string[],
+  pluginContext: PluginContext,
+): Promise<ResolvedPlugins> {
+  const allSetups: PluginSetup[] = [];
+
+  for (const dir of traversedDirs) {
+    const pluginsDir = join(dir, PLUGINS_DIR_NAME);
+
+    let entries: Dirent[];
+    try {
+      entries = await readdir(pluginsDir, { withFileTypes: true });
+    } catch {
+      // _plugins/ が存在しない → スキップ
+      continue;
+    }
+
+    // ファイル名順でソートし、適用順序を決定的にする
+    const pluginFiles = entries
+      .filter((e) => e.isFile() && e.name.endsWith(PLUGIN_FILE_EXTENSION))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    for (const file of pluginFiles) {
+      const filePath = join(pluginsDir, file.name);
+      const mod = await import(filePath);
+      const setup: PluginSetup | undefined = mod.default;
+      if (setup === undefined) {
+        throw new Error(`Plugin file ${filePath} does not have a default export`);
+      }
+      allSetups.push(setup);
+    }
+  }
+
+  return resolvePlugins(allSetups, pluginContext);
+}
+
+export { buildMiddlewareChain, definePlugin, resolvePlugins, scanPluginsAlongPath };
 export type { ResolvedPlugins };

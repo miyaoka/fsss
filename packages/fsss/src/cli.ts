@@ -4,10 +4,10 @@ import { loadMergedConfig } from "./config";
 import { generateHelp, generateSubcommandHelp, generateValidationErrorHelp } from "./help";
 import { parseTokens } from "./parser";
 import type { ParserConfig } from "./parser";
-import { buildMiddlewareChain, resolvePlugins } from "./plugin";
+import { buildMiddlewareChain, scanPluginsAlongPath } from "./plugin";
 import { resolveValues } from "./resolver";
 import { resolveRoute } from "./router";
-import type { ArgsDefs, CommandConfig, MiddlewareContext, PluginSetup } from "./types";
+import type { ArgsDefs, CommandConfig, MiddlewareContext } from "./types";
 import { validateArgs } from "./validator";
 import { isBooleanSchema } from "./zod-utils";
 
@@ -19,7 +19,6 @@ interface CLIOptions {
   name: string;
   commandsDir?: string;
   autoEnv?: AutoEnvConfig;
-  plugins?: PluginSetup[];
 }
 
 interface CLI {
@@ -108,7 +107,6 @@ function createCLI(options: CLIOptions): CLI {
   const commandsDir = options.commandsDir ?? DEFAULT_COMMANDS_DIR;
   const programName = options.name;
   const envPrefix = options.autoEnv?.prefix;
-  const plugins = options.plugins ?? [];
 
   async function run(): Promise<void> {
     const rawTokens = process.argv.slice(ARGV_SKIP);
@@ -188,8 +186,8 @@ function createCLI(options: CLIOptions): CLI {
       throw error;
     }
 
-    // プラグイン解決
-    const { extensions, middlewares } = await resolvePlugins(plugins, {
+    // プラグイン解決（commandsDir → コマンドファイルまでの各階層で _plugins/ をスキャン）
+    const { extensions, middlewares } = await scanPluginsAlongPath(routeResult.traversedDirs, {
       cliName: programName,
     });
 

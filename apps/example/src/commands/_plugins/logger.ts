@@ -1,12 +1,10 @@
 import { definePlugin } from "@miyaoka/fsss";
 
-declare module "@miyaoka/fsss" {
-  interface Extensions {
-    logger: {
-      info: (message: string) => void;
-      error: (message: string) => void;
-    };
-  }
+export interface LoggerExtensions {
+  logger: {
+    info: (message: string) => void;
+    error: (message: string) => void;
+  };
 }
 
 // ANSI カラーコード

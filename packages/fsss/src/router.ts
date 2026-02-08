@@ -4,12 +4,14 @@ import { join, resolve } from "node:path";
 const DYNAMIC_SEGMENT_PATTERN = /^\[(.+)]$/;
 const COMMAND_FILE_EXTENSION = ".ts";
 const INDEX_FILE_NAME = "index";
+const INTERNAL_PREFIX = "_";
 
 interface RouteResolved {
   kind: "resolved";
   filePath: string;
   params: Record<string, string>;
   remainingTokens: string[];
+  traversedDirs: string[];
 }
 
 interface RouteUnresolved {
@@ -42,6 +44,11 @@ async function listAvailableEntries(dir: string): Promise<AvailableEntry[]> {
     const result: AvailableEntry[] = [];
 
     for (const entry of entries) {
+      // _ prefix はフレームワーク内部用（_plugins 等）なのでスキップ
+      if (entry.name.startsWith(INTERNAL_PREFIX)) {
+        continue;
+      }
+
       if (entry.isFile() && entry.name.endsWith(COMMAND_FILE_EXTENSION)) {
         const name = entry.name.slice(0, -COMMAND_FILE_EXTENSION.length);
         // index はデフォルトコマンドなのでリストに表示しない
@@ -75,6 +82,7 @@ async function listAvailableEntries(dir: string): Promise<AvailableEntry[]> {
 async function resolveRoute(commandsDir: string, tokens: string[]): Promise<RouteResult> {
   let currentDir = resolve(commandsDir);
   const params: Record<string, string> = {};
+  const traversedDirs: string[] = [currentDir];
   let consumedCount = 0;
 
   for (let i = 0; i < tokens.length; i++) {
@@ -97,6 +105,7 @@ async function resolveRoute(commandsDir: string, tokens: string[]): Promise<Rout
         filePath: join(currentDir, fileMatch.name),
         params,
         remainingTokens: tokens.slice(consumedCount),
+        traversedDirs,
       };
     }
 
@@ -104,6 +113,7 @@ async function resolveRoute(commandsDir: string, tokens: string[]): Promise<Rout
     const dirMatch = entries.find((e) => e.isDirectory() && e.name === token);
     if (dirMatch) {
       currentDir = join(currentDir, dirMatch.name);
+      traversedDirs.push(currentDir);
       consumedCount = i + 1;
       continue;
     }
@@ -124,6 +134,7 @@ async function resolveRoute(commandsDir: string, tokens: string[]): Promise<Rout
     if (dynamicMatch && dynamicParamName !== undefined) {
       params[dynamicParamName] = token;
       currentDir = join(currentDir, dynamicMatch.name);
+      traversedDirs.push(currentDir);
       consumedCount = i + 1;
       continue;
     }
@@ -140,6 +151,7 @@ async function resolveRoute(commandsDir: string, tokens: string[]): Promise<Rout
       filePath: indexPath,
       params,
       remainingTokens: tokens.slice(consumedCount),
+      traversedDirs,
     };
   }
 
