@@ -1,3 +1,4 @@
+import type { AvailableEntry } from "./router";
 import type { ArgDef, ArgsDefs } from "./types";
 import { isBooleanSchema } from "./zod-utils";
 
@@ -112,5 +113,44 @@ function generateHelp(config: HelpConfig): string {
   return lines.join("\n");
 }
 
-export { generateHelp };
-export type { HelpConfig };
+// ルート未解決時のサブコマンド一覧ヘルプを生成する
+interface SubcommandHelpConfig {
+  programName: string;
+  commandPath: string[];
+  availableEntries: AvailableEntry[];
+}
+
+function generateSubcommandHelp(config: SubcommandHelpConfig): string {
+  const { programName, commandPath, availableEntries } = config;
+  const lines: string[] = [];
+
+  const prefix = [programName, ...commandPath].join(" ");
+  lines.push(`Usage: ${prefix} <command>`);
+  lines.push("");
+
+  if (availableEntries.length === 0) {
+    lines.push("No available commands.");
+    return lines.join("\n");
+  }
+
+  lines.push("Available commands:");
+  for (const entry of availableEntries) {
+    if (entry.isDynamic) {
+      lines.push(`${INDENT}<${entry.paramName}>`);
+      continue;
+    }
+    lines.push(`${INDENT}${entry.name}`);
+  }
+
+  return lines.join("\n");
+}
+
+// バリデーションエラー時のヘルプを生成する
+// コマンドのヘルプにエラーメッセージを付加する
+function generateValidationErrorHelp(helpText: string, errors: string[]): string {
+  const lines = [`Error: ${errors.join(", ")}`, "", helpText];
+  return lines.join("\n");
+}
+
+export { generateHelp, generateSubcommandHelp, generateValidationErrorHelp };
+export type { HelpConfig, SubcommandHelpConfig };

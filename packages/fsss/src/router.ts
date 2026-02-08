@@ -5,11 +5,26 @@ const DYNAMIC_SEGMENT_PATTERN = /^\[(.+)]$/;
 const COMMAND_FILE_EXTENSION = ".ts";
 const INDEX_FILE_NAME = "index";
 
-interface RouteResult {
+interface RouteResolved {
+  kind: "resolved";
   filePath: string;
   params: Record<string, string>;
   remainingTokens: string[];
 }
+
+interface RouteUnresolved {
+  kind: "unresolved";
+  stoppedDir: string;
+  availableEntries: AvailableEntry[];
+}
+
+interface AvailableEntry {
+  name: string;
+  isDynamic: boolean;
+  paramName?: string;
+}
+
+type RouteResult = RouteResolved | RouteUnresolved;
 
 async function fileExists(filePath: string): Promise<boolean> {
   try {
@@ -17,6 +32,43 @@ async function fileExists(filePath: string): Promise<boolean> {
     return s.isFile();
   } catch {
     return false;
+  }
+}
+
+// ディレクトリ内の利用可能なサブコマンド/サブディレクトリを列挙する
+async function listAvailableEntries(dir: string): Promise<AvailableEntry[]> {
+  try {
+    const entries = await readdir(dir, { withFileTypes: true });
+    const result: AvailableEntry[] = [];
+
+    for (const entry of entries) {
+      if (entry.isFile() && entry.name.endsWith(COMMAND_FILE_EXTENSION)) {
+        const name = entry.name.slice(0, -COMMAND_FILE_EXTENSION.length);
+        // index はデフォルトコマンドなのでリストに表示しない
+        if (name === INDEX_FILE_NAME) {
+          continue;
+        }
+        result.push({ name, isDynamic: false });
+        continue;
+      }
+
+      if (entry.isDirectory()) {
+        const m = entry.name.match(DYNAMIC_SEGMENT_PATTERN);
+        if (m !== null) {
+          result.push({
+            name: entry.name,
+            isDynamic: true,
+            paramName: m[1],
+          });
+          continue;
+        }
+        result.push({ name: entry.name, isDynamic: false });
+      }
+    }
+
+    return result;
+  } catch {
+    return [];
   }
 }
 
@@ -41,6 +93,7 @@ async function resolveRoute(commandsDir: string, tokens: string[]): Promise<Rout
     if (fileMatch) {
       consumedCount = i + 1;
       return {
+        kind: "resolved",
         filePath: join(currentDir, fileMatch.name),
         params,
         remainingTokens: tokens.slice(consumedCount),
@@ -83,14 +136,21 @@ async function resolveRoute(commandsDir: string, tokens: string[]): Promise<Rout
   const indexPath = join(currentDir, INDEX_FILE_NAME + COMMAND_FILE_EXTENSION);
   if (await fileExists(indexPath)) {
     return {
+      kind: "resolved",
       filePath: indexPath,
       params,
       remainingTokens: tokens.slice(consumedCount),
     };
   }
 
-  throw new Error(`Command not found: ${tokens.join(" ")}`);
+  // 未解決: 利用可能なサブコマンドを列挙して返す
+  const availableEntries = await listAvailableEntries(currentDir);
+  return {
+    kind: "unresolved",
+    stoppedDir: currentDir,
+    availableEntries,
+  };
 }
 
 export { resolveRoute };
-export type { RouteResult };
+export type { AvailableEntry, RouteResolved, RouteResult, RouteUnresolved };

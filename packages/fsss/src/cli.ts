@@ -1,6 +1,7 @@
 import { basename, relative, resolve } from "node:path";
+import { ZodError } from "zod";
 import { loadConfig } from "./config";
-import { generateHelp } from "./help";
+import { generateHelp, generateSubcommandHelp, generateValidationErrorHelp } from "./help";
 import { parseTokens } from "./parser";
 import type { ParserConfig } from "./parser";
 import { resolveValues } from "./resolver";
@@ -21,6 +22,7 @@ interface CLI {
 
 const DEFAULT_COMMANDS_DIR = "commands";
 const ARGV_SKIP = 2;
+const EXIT_CODE_ERROR = 1;
 
 // arg 定義からパーサー設定を構築する
 function buildParserConfig(argsDefs: ArgsDefs): ParserConfig {
@@ -40,13 +42,22 @@ function buildParserConfig(argsDefs: ArgsDefs): ParserConfig {
 }
 
 // コマンドファイルパスからコマンドパス（help 表示用）を抽出する
+// 動的セグメント [name] はフィルタする
 function extractCommandPath(commandsDir: string, filePath: string): string[] {
   const relPath = relative(resolve(commandsDir), filePath);
-  // "serve.ts" → ["serve"], "config/set.ts" → ["config", "set"]
   const withoutExt = relPath.replace(/\.ts$/, "");
   const segments = withoutExt.split("/");
-  // index はルートコマンドなので除外
-  return segments.filter((s) => s !== "index");
+  return segments.filter((s) => s !== "index" && !s.startsWith("["));
+}
+
+// ルート未解決時の入力済みコマンドパスを抽出する
+function extractPartialCommandPath(commandsDir: string, stoppedDir: string): string[] {
+  const relPath = relative(resolve(commandsDir), stoppedDir);
+  if (relPath === "" || relPath === ".") {
+    return [];
+  }
+  const segments = relPath.split("/");
+  return segments.filter((s) => !s.startsWith("["));
 }
 
 function createCLI(options?: CLIOptions): CLI {
@@ -59,6 +70,18 @@ function createCLI(options?: CLIOptions): CLI {
 
     // ルーティング
     const routeResult = await resolveRoute(commandsDir, tokens);
+
+    // ルート未解決 → サブコマンド一覧ヘルプを表示
+    if (routeResult.kind === "unresolved") {
+      const commandPath = extractPartialCommandPath(commandsDir, routeResult.stoppedDir);
+      const helpText = generateSubcommandHelp({
+        programName,
+        commandPath,
+        availableEntries: routeResult.availableEntries,
+      });
+      console.log(helpText);
+      return;
+    }
 
     // コマンドファイルの動的 import
     const commandModule = await import(routeResult.filePath);
@@ -99,8 +122,27 @@ function createCLI(options?: CLIOptions): CLI {
       config,
     });
 
-    // バリデーション
-    const args = validateArgs(argsDefs, rawValues);
+    // バリデーション（失敗時はヘルプを表示）
+    let args: Record<string, unknown>;
+    try {
+      args = validateArgs(argsDefs, rawValues);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const commandPath = extractCommandPath(commandsDir, routeResult.filePath);
+        const helpText = generateHelp({
+          programName,
+          commandPath,
+          description: commandConfig.description,
+          argsDefs: Object.keys(argsDefs).length > 0 ? argsDefs : undefined,
+        });
+        const errorMessages = error.issues.map(
+          (issue) => `${issue.path.join(".")}: ${issue.message}`,
+        );
+        console.error(generateValidationErrorHelp(helpText, errorMessages));
+        process.exit(EXIT_CODE_ERROR);
+      }
+      throw error;
+    }
 
     // ハンドラ実行
     await commandConfig.run({
