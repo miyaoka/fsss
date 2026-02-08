@@ -28,18 +28,20 @@ fsss/
 
 ## フレームワーク内部のモジュール構成
 
-| モジュール     | 責務                                                                             |
-| -------------- | -------------------------------------------------------------------------------- |
-| `cli`          | エントリポイント。`createCLI` を提供し、パイプライン全体を制御する               |
-| `router`       | `commands/` を走査してコマンドファイルを特定。動的セグメントから `params` を抽出 |
-| `parser`       | 残りトークンを `--flag` / `-f` / 位置引数に分類                                  |
-| `resolver`     | CLI flag > env > config > default の優先順位で値を解決                           |
-| `validator`    | Zod スキーマで型変換 + バリデーション                                            |
-| `help`         | args 定義からヘルプ文字列を生成                                                  |
-| `config`       | config ファイルの読み込み・マージ                                                |
-| `auto-mapping` | コマンドパス + arg 名から env 名・config パスを自動導出                          |
-| `types`        | `defineCommand` の型定義。Zod スキーマからハンドラ引数の型を推論                 |
-| `zod-utils`    | Zod スキーマの型判定ユーティリティ                                               |
+| モジュール     | 責務                                                                              |
+| -------------- | --------------------------------------------------------------------------------- |
+| `cli`          | エントリポイント。`createCLI` を提供し、パイプライン全体を制御する                |
+| `router`       | `commands/` を走査してコマンドファイルを特定。動的セグメントから `params` を抽出  |
+| `parser`       | 残りトークンを `--flag` / `-f` / 位置引数に分類                                   |
+| `resolver`     | CLI flag > env > config > default の優先順位で値を解決                            |
+| `validator`    | Zod スキーマで型変換 + バリデーション                                             |
+| `help`         | args 定義からヘルプ文字列を生成                                                   |
+| `config`       | config ファイルの読み込み・マージ                                                 |
+| `auto-mapping` | コマンドパス + arg 名から env 名・config パスを自動導出                           |
+| `plugin`       | `definePlugin` とプラグイン解決。`_plugins/` の自動スキャンとミドルウェアチェーン |
+| `codegen`      | `_plugins/` を走査して Extensions の型定義（`.d.ts`）を自動生成する CLI ツール    |
+| `types`        | `defineCommand` の型定義。Zod スキーマからハンドラ引数の型を推論                  |
+| `zod-utils`    | Zod スキーマの型判定ユーティリティ                                                |
 
 ## ドキュメント
 

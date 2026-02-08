@@ -4,9 +4,10 @@ import { loadMergedConfig } from "./config";
 import { generateHelp, generateSubcommandHelp, generateValidationErrorHelp } from "./help";
 import { parseTokens } from "./parser";
 import type { ParserConfig } from "./parser";
+import { buildMiddlewareChain, scanPluginsAlongPath } from "./plugin";
 import { resolveValues } from "./resolver";
 import { resolveRoute } from "./router";
-import type { ArgsDefs, CommandConfig } from "./types";
+import type { ArgsDefs, CommandConfig, MiddlewareContext } from "./types";
 import { validateArgs } from "./validator";
 import { isBooleanSchema } from "./zod-utils";
 
@@ -185,11 +186,28 @@ function createCLI(options: CLIOptions): CLI {
       throw error;
     }
 
-    // ハンドラ実行
-    await commandConfig.run({
+    // プラグイン解決（commandsDir → コマンドファイルまでの各階層で _plugins/ をスキャン）
+    const { extensions, middlewares } = await scanPluginsAlongPath(routeResult.traversedDirs, {
+      cliName: programName,
+    });
+
+    // ミドルウェアチェーン構築 → ハンドラ実行
+    const middlewareContext: MiddlewareContext = {
+      commandPath,
       params: routeResult.params,
       args,
+      extensions,
+    };
+
+    const handler = buildMiddlewareChain(middlewares, async (ctx) => {
+      await commandConfig.run({
+        params: ctx.params,
+        args: ctx.args,
+        extensions: ctx.extensions,
+      });
     });
+
+    await handler(middlewareContext);
   }
 
   return { run };

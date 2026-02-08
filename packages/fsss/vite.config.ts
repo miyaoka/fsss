@@ -7,9 +7,11 @@ const isWatch = process.argv.includes("--watch");
 export default defineConfig({
   build: {
     lib: {
-      entry: resolve(__dirname, "src/index.ts"),
+      entry: {
+        index: resolve(__dirname, "src/index.ts"),
+        codegen: resolve(__dirname, "src/codegen.ts"),
+      },
       formats: ["es"],
-      fileName: "index",
     },
     outDir: "dist",
     watch: isWatch ? { include: ["src/**/*"] } : null,

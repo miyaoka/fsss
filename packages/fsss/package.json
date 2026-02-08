@@ -20,6 +20,9 @@
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "fsss-codegen": "./dist/codegen.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

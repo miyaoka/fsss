@@ -22,10 +22,10 @@ export default defineCommand({
       default: false,
     },
   },
-  run({ args }) {
-    console.log(`Server starting on ${args.host}:${args.port}`);
+  run({ args, extensions }) {
+    extensions.logger.info(`Server starting on ${args.host}:${args.port}`);
     if (args.verbose) {
-      console.log("Verbose mode enabled");
+      extensions.logger.info("Verbose mode enabled");
     }
   },
 });

@@ -16,10 +16,12 @@ export default defineCommand({
       default: false,
     },
   },
-  run({ params, args }) {
-    console.log(`Pushing ${args.branch} to ${params.name}`);
+  run({ params, args, extensions }) {
+    extensions.logger.info(
+      `Pushing ${args.branch} to ${params.name} (token: ${extensions.auth.token})`,
+    );
     if (args.force) {
-      console.log("Force push enabled");
+      extensions.logger.info("Force push enabled");
     }
   },
 });

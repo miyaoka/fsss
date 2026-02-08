@@ -31,11 +31,40 @@ type InferArgs<T extends ArgsDefs> = {
 
 type Params = Record<string, string>;
 
+// --- プラグインシステム ---
+
+// ユーザーが declare module '@miyaoka/fsss' で拡張する interface
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface Extensions {}
+
+// ミドルウェア
+interface MiddlewareContext {
+  commandPath: string[];
+  params: Params;
+  args: Record<string, unknown>;
+  extensions: Extensions;
+}
+
+type Middleware = (context: MiddlewareContext, next: () => Promise<void>) => Promise<void>;
+
+// プラグイン
+interface PluginContext {
+  cliName: string;
+}
+
+interface PluginConfig {
+  provide?: Partial<Extensions>;
+  middleware?: Middleware;
+}
+
+type PluginSetup = (context: PluginContext) => PluginConfig | Promise<PluginConfig>;
+
 // --- コマンド定義 ---
 
 interface RunContext<T extends ArgsDefs> {
   params: Params;
   args: InferArgs<T>;
+  extensions: Extensions;
 }
 
 interface CommandConfig<T extends ArgsDefs = ArgsDefs> {
@@ -54,4 +83,18 @@ function defineCommand<T extends ArgsDefs>(config: CommandConfig<T>): CommandCon
 }
 
 export { defineCommand };
-export type { ArgDef, ArgDefBase, ArgsDefs, CommandConfig, InferArgs, Params, RunContext };
+export type {
+  ArgDef,
+  ArgDefBase,
+  ArgsDefs,
+  CommandConfig,
+  Extensions,
+  InferArgs,
+  Middleware,
+  MiddlewareContext,
+  Params,
+  PluginConfig,
+  PluginContext,
+  PluginSetup,
+  RunContext,
+};
