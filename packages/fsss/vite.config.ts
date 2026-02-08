@@ -13,6 +13,9 @@ export default defineConfig({
     },
     outDir: "dist",
     watch: isWatch ? { include: ["src/**/*"] } : null,
+    rollupOptions: {
+      external: ["zod", /^node:/],
+    },
   },
   plugins: [dts({ exclude: ["**/*.test.ts"] })],
 });

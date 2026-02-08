@@ -74,6 +74,9 @@ importers:
       fsss:
         specifier: workspace:*
         version: link:../../packages/fsss
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.67
     devDependencies:
       '@tsconfig/node24':
         specifier: 'catalog:'

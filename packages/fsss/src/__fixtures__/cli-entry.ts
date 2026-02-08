@@ -1,9 +1,7 @@
-#!/usr/bin/env bun
-
-import { createCLI } from "fsss";
+import { createCLI } from "../index";
 
 const cli = createCLI({
   commandsDir: import.meta.dirname + "/commands",
-  name: "fsss-example",
+  name: "test-cli",
 });
 await cli.run();

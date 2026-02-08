@@ -7,10 +7,10 @@
     "dev": "pnpm -r --parallel --if-present dev",
     "build": "pnpm -r --if-present build",
     "test:all": "pnpm -r --include-workspace-root --if-present --no-bail --aggregate-output --reporter=append-only test",
-    "typecheck": "tsgo --noEmit",
     "typecheck:all": "pnpm -r --include-workspace-root --if-present --no-bail --aggregate-output --reporter=append-only typecheck",
     "lint:all": "pnpm -r --include-workspace-root --if-present --no-bail --aggregate-output --reporter=append-only lint",
     "fix": "oxfmt '!apps/**' '!packages/**'",
+    "example": "bun run apps/example/src/index.ts",
     "fix:all": "pnpm -r --include-workspace-root --if-present --no-bail --aggregate-output --reporter=append-only fix",
     "prepare": "lefthook install"
   },
