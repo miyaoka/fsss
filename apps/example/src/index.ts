@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 import { join } from "node:path";
-import { createCLI } from "fsss";
+import { createCLI } from "@miyaoka/fsss";
 
 const cli = createCLI({
   // CLI 名（必須）。ヘルプの Usage 表示と config ファイル名に使われる

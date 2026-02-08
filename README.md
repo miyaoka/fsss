@@ -1,5 +1,9 @@
 # fsss
 
+[![npm version](https://img.shields.io/npm/v/@miyaoka/fsss)](https://www.npmjs.com/package/@miyaoka/fsss)
+[![npm downloads](https://img.shields.io/npm/dm/@miyaoka/fsss)](https://www.npmjs.com/package/@miyaoka/fsss)
+[![license](https://img.shields.io/npm/l/@miyaoka/fsss)](https://github.com/miyaoka/fsss/blob/main/LICENSE)
+
 **fsss** — "File Structure, Single Schema" — bun + TypeScript + Zod
 
 > ファイル構造がそのままコマンド構造になり、スキーマを一回書けば CLI フラグ・環境変数・設定ファイルのどこから値が来ても同じように型付きで受け取れる CLI フレームワーク

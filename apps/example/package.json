@@ -13,7 +13,7 @@
     "fix": "oxlint --type-aware --fix . && oxfmt ."
   },
   "dependencies": {
-    "fsss": "workspace:*",
+    "@miyaoka/fsss": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {
