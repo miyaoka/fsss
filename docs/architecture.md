@@ -1,6 +1,6 @@
 # 内部アーキテクチャ
 
-fsss の内部は **extractFrameworkFlags → Router → Parser → Resolver → Validator** のパイプラインで構成される。各モジュールは前段の出力だけを受け取り、後段に渡す。
+fsss の内部は **extractFrameworkFlags → Router → Parser → Resolver → Validator → Plugin → Handler** のパイプラインで構成される。各モジュールは前段の出力だけを受け取り、後段に渡す。
 
 ```mermaid
 flowchart TD
@@ -10,14 +10,16 @@ flowchart TD
   parser["Parser<br/>トークン分類"]
   resolver["Resolver<br/>値の解決"]
   validator["Validator<br/>型変換・検証"]
+  plugin["Plugin<br/>_plugins/ スキャン・ミドルウェアチェーン構築"]
   handler["Handler<br/>run()"]
 
   argv --> extract
   extract -- "残りトークン" --> router
-  router -- "残りトークン" --> parser
+  router -- "残りトークン + traversedDirs" --> parser
   parser -- "flags / positionals" --> resolver
   resolver -- "生の値" --> validator
-  validator -- "型付きの値" --> handler
+  validator -- "型付きの値" --> plugin
+  plugin -- "extensions + middleware chain" --> handler
 ```
 
 ## Router — コマンド解決
@@ -30,6 +32,8 @@ flowchart TD
 - `-` で始まるトークンに到達した時点でルーティングを停止する
 - 動的セグメント `[param]` にマッチしたトークンの値を `params` に収集する
 - 消費されなかったトークンを `remainingTokens` として後段に渡す
+- 通過したディレクトリを `traversedDirs` に記録する（Plugin のスキャンに使われる）
+- `_` prefix のエントリはルーティング対象外（`_plugins/` 等）
 
 ### 出力の分岐
 
@@ -180,6 +184,32 @@ flowchart LR
 
 > [!NOTE]
 > `z.coerce.number()` を使っている場合でも `z.preprocess()` のラップは適用される。`Number("3000")` → `3000` → `z.coerce.number()` が受け取る。coerce は数値をそのまま通すので、冪等であり問題にならない。
+
+## Plugin — プラグイン解決
+
+Router が記録した `traversedDirs` を使い、各ディレクトリの `_plugins/` をスキャンしてプラグインを自動登録する。
+
+### 責務
+
+- `traversedDirs` の各ディレクトリで `_plugins/` の存在を確認する
+- 見つかったプラグインファイルを動的 import し、`definePlugin` の戻り値を収集する
+- `provide` を蓄積して `extensions` オブジェクトを構築する
+- `middleware` を収集してミドルウェアチェーン（onion model）を構築する
+- root に近いプラグインが外側、leaf に近いプラグインが内側になる
+
+### ミドルウェアチェーン
+
+```mermaid
+flowchart LR
+  mw1["middleware[0]<br/>(root)"]
+  mw2["middleware[1]<br/>(leaf)"]
+  handler["Handler<br/>run()"]
+
+  mw1 -- "next()" --> mw2
+  mw2 -- "next()" --> handler
+  handler -- "return" --> mw2
+  mw2 -- "return" --> mw1
+```
 
 ## トレース
 
