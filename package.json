@@ -12,12 +12,14 @@
     "fix": "oxfmt '!apps/**' '!packages/**'",
     "example": "bun run apps/example/src/index.ts",
     "fix:all": "pnpm -r --include-workspace-root --if-present --no-bail --aggregate-output --reporter=append-only fix",
+    "release": "bumpp packages/fsss/package.json",
     "prepare": "lefthook install"
   },
   "devDependencies": {
     "@tsconfig/node24": "catalog:",
     "@types/node": "catalog:",
     "@typescript/native-preview": "catalog:",
+    "bumpp": "^10.4.1",
     "lefthook": "2.1.0",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",

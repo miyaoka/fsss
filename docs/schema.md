@@ -6,7 +6,7 @@
 
 ```ts
 // commands/serve.ts
-import { defineCommand } from "fsss";
+import { defineCommand } from "@miyaoka/fsss";
 import { z } from "zod";
 
 export default defineCommand({
