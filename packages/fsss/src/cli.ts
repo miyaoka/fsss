@@ -4,9 +4,10 @@ import { loadMergedConfig } from "./config";
 import { generateHelp, generateSubcommandHelp, generateValidationErrorHelp } from "./help";
 import { parseTokens } from "./parser";
 import type { ParserConfig } from "./parser";
+import { buildMiddlewareChain, resolvePlugins } from "./plugin";
 import { resolveValues } from "./resolver";
 import { resolveRoute } from "./router";
-import type { ArgsDefs, CommandConfig } from "./types";
+import type { ArgsDefs, CommandConfig, MiddlewareContext, PluginSetup } from "./types";
 import { validateArgs } from "./validator";
 import { isBooleanSchema } from "./zod-utils";
 
@@ -18,6 +19,7 @@ interface CLIOptions {
   name: string;
   commandsDir?: string;
   autoEnv?: AutoEnvConfig;
+  plugins?: PluginSetup[];
 }
 
 interface CLI {
@@ -106,6 +108,7 @@ function createCLI(options: CLIOptions): CLI {
   const commandsDir = options.commandsDir ?? DEFAULT_COMMANDS_DIR;
   const programName = options.name;
   const envPrefix = options.autoEnv?.prefix;
+  const plugins = options.plugins ?? [];
 
   async function run(): Promise<void> {
     const rawTokens = process.argv.slice(ARGV_SKIP);
@@ -185,11 +188,28 @@ function createCLI(options: CLIOptions): CLI {
       throw error;
     }
 
-    // ハンドラ実行
-    await commandConfig.run({
+    // プラグイン解決
+    const { extensions, middlewares } = await resolvePlugins(plugins, {
+      cliName: programName,
+    });
+
+    // ミドルウェアチェーン構築 → ハンドラ実行
+    const middlewareContext: MiddlewareContext = {
+      commandPath,
       params: routeResult.params,
       args,
+      extensions,
+    };
+
+    const handler = buildMiddlewareChain(middlewares, async (ctx) => {
+      await commandConfig.run({
+        params: ctx.params,
+        args: ctx.args,
+        extensions: ctx.extensions,
+      });
     });
+
+    await handler(middlewareContext);
   }
 
   return { run };
