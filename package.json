@@ -1,0 +1,27 @@
+{
+  "name": "fsss",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm -r --parallel --if-present dev",
+    "build": "pnpm -r --if-present build",
+    "test:all": "pnpm -r --include-workspace-root --if-present --no-bail --aggregate-output --reporter=append-only test",
+    "typecheck": "tsgo --noEmit",
+    "typecheck:all": "pnpm -r --include-workspace-root --if-present --no-bail --aggregate-output --reporter=append-only typecheck",
+    "lint:all": "pnpm -r --include-workspace-root --if-present --no-bail --aggregate-output --reporter=append-only lint",
+    "fix": "oxfmt '!apps/**' '!packages/**'",
+    "fix:all": "pnpm -r --include-workspace-root --if-present --no-bail --aggregate-output --reporter=append-only fix",
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "@tsconfig/node24": "catalog:",
+    "@types/node": "catalog:",
+    "@typescript/native-preview": "catalog:",
+    "lefthook": "2.1.0",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:",
+    "typescript": "catalog:"
+  }
+}

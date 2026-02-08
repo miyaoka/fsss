@@ -1,0 +1,36 @@
+{
+  "name": "fsss",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "prepare": "vite build",
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "test": "bun test",
+    "typecheck": "tsgo --noEmit",
+    "lint": "oxlint --type-aware .",
+    "fix": "oxlint --type-aware --fix . && oxfmt ."
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@tsconfig/node24": "catalog:",
+    "@types/bun": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:",
+    "typescript": "catalog:",
+    "unplugin-dts": "catalog:",
+    "vite": "catalog:"
+  }
+}

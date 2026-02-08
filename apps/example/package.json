@@ -1,0 +1,26 @@
+{
+  "name": "@fsss/example",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "fsss-example": "./src/index.ts"
+  },
+  "scripts": {
+    "cli": "bun run src/index.ts",
+    "typecheck": "tsgo --noEmit",
+    "lint": "oxlint --type-aware .",
+    "fix": "oxlint --type-aware --fix . && oxfmt ."
+  },
+  "dependencies": {
+    "fsss": "workspace:*"
+  },
+  "devDependencies": {
+    "@tsconfig/node24": "catalog:",
+    "@types/bun": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:",
+    "typescript": "catalog:"
+  }
+}

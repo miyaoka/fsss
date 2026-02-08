@@ -1,0 +1,52 @@
+# ** が0階層以上にマッチするようにする（デフォルトは1階層以上）
+glob_matcher: doublestar
+
+output:
+  - execution_out
+
+pre-commit:
+  parallel: true
+  jobs:
+    # Formatter（ts 以外）
+    - name: oxfmt
+      glob: "**/*.{css,scss,md}"
+      run: pnpm exec oxfmt {staged_files}
+      stage_fixed: true
+
+    # Linter + Formatter
+    - name: oxlint-root
+      glob: "*.ts"
+      exclude:
+        - "apps/**"
+        - "packages/**"
+      run: pnpm exec oxlint --type-aware --fix {staged_files} && pnpm exec oxfmt {staged_files}
+      stage_fixed: true
+    - name: oxlint-fsss
+      root: "packages/fsss/"
+      glob: "**/*.ts"
+      run: pnpm exec oxlint --type-aware --fix {staged_files} && pnpm exec oxfmt {staged_files}
+      stage_fixed: true
+    - name: oxlint-example
+      root: "apps/example/"
+      glob: "**/*.ts"
+      run: pnpm exec oxlint --type-aware --fix {staged_files} && pnpm exec oxfmt {staged_files}
+      stage_fixed: true
+
+# git pull / merge 後に lockfile の変更を検出し、pnpm install を促す
+post-merge:
+  jobs:
+    - name: check-lockfile
+      run: |
+        if git diff --name-only ORIG_HEAD HEAD | grep -q "pnpm-lock.yaml"; then
+          printf '\033[33m⚠️  pnpm-lock.yaml has changed. Run pnpm install to update dependencies.\033[0m\n'
+        fi
+
+# ブランチ切り替え後に lockfile の変更を検出し、pnpm install を促す
+# {3}=1: branch checkout, {3}=0: file checkout
+post-checkout:
+  jobs:
+    - name: check-lockfile
+      run: |
+        if [ "{3}" = "1" ] && git diff --name-only {1} {2} | grep -q "pnpm-lock.yaml"; then
+          printf '\033[33m⚠️  pnpm-lock.yaml has changed. Run pnpm install to update dependencies.\033[0m\n'
+        fi
