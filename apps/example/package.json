@@ -13,7 +13,8 @@
     "fix": "oxlint --type-aware --fix . && oxfmt ."
   },
   "dependencies": {
-    "fsss": "workspace:*"
+    "fsss": "workspace:*",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@tsconfig/node24": "catalog:",

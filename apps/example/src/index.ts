@@ -1,3 +1,9 @@
 #!/usr/bin/env bun
 
-console.log("Hello from fsss example");
+import { createCLI } from "fsss";
+
+const cli = createCLI({
+  commandsDir: import.meta.dirname + "/commands",
+  name: "fsss-example",
+});
+await cli.run();
