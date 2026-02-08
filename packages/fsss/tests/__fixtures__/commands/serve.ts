@@ -1,4 +1,4 @@
-import { defineCommand } from "../../index";
+import { defineCommand } from "../../../src/index";
 import { z } from "zod";
 
 export default defineCommand({

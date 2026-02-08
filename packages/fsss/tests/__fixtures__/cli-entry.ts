@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { createCLI } from "../index";
+import { createCLI } from "../../src/index";
 
 const cli = createCLI({
   commandsDir: join(import.meta.dirname, "commands"),
