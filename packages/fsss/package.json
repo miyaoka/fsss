@@ -30,7 +30,7 @@
     "dist"
   ],
   "scripts": {
-    "prepublishOnly": "vite build",
+    "prepare": "vite build",
     "build": "vite build",
     "dev": "vite build --watch",
     "test": "bun test",
