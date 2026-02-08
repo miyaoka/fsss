@@ -1,42 +1,30 @@
 # fsss
 
-**fsss** — File Structure, Single Schema
+**fsss** — "File Structure, Single Schema" — bun + TypeScript + Zod
 
-ファイル構造がそのままコマンド構造になり、スキーマを一回書けば CLI フラグ・環境変数・設定ファイルのどこから値が来ても同じように型付きで受け取れるフレームワーク。
+> ファイル構造がそのままコマンド構造になり、スキーマを一回書けば CLI フラグ・環境変数・設定ファイルのどこから値が来ても同じように型付きで受け取れる CLI フレームワーク
+>
+> _A CLI framework where your file structure becomes your command structure, and a single schema gives you typed values whether they come from flags, env vars, or config files._
 
-A CLI framework where your file structure becomes your command structure, and a single schema gives you typed values whether they come from flags, env vars, or config files.
+## File Structure — ファイルを置くだけでコマンドが生える
 
-bun + TypeScript ネイティブ。
-
-## コアコンセプト
-
-fsss は2つの柱で成り立つ。
-
-- **File Structure** — `commands/` ディレクトリのファイル構造がそのままコマンドツリーになる。コマンドの登録コードは不要
-- **Single Schema** — 各コマンドファイルに書く1つのスキーマ定義が、CLI フラグ・環境変数・設定ファイル・デフォルト値の全てを統一的に扱い、型付きの値をハンドラに渡す
-
-## クイックスタート
-
-### エントリポイント
-
-```ts
-import { createCLI } from "fsss";
-
-const cli = createCLI({
-  name: "my-app",
-  autoEnv: { prefix: "MYAPP" },
-});
-await cli.run();
+```
+commands/
+  serve.ts              → my-app serve
+  config/
+    set.ts              → my-app config set
+    get.ts              → my-app config get
+  remote/
+    [name]/
+      push.ts           → my-app remote origin push
 ```
 
-### コマンドファイル
+ファイルを置くだけでコマンドが生える。ディレクトリのネストがサブコマンドの階層になる。`[name]` は動的セグメントで、`params.name` として値を受け取れる。
 
-`commands/serve.ts` を置くだけで `my-app serve` が使えるようになる。
+## Single Schema — 1つの定義で CLI / env / config を統合
 
 ```ts
-import { defineCommand } from "fsss";
-import { z } from "zod";
-
+// commands/serve.ts
 export default defineCommand({
   description: "サーバーを起動する",
   args: {
@@ -53,23 +41,53 @@ export default defineCommand({
     },
   },
   run({ args }) {
-    console.log(`Server starting on ${args.host}:${args.port}`);
+    // args.port: number, args.host: string — 型推論される
+    console.log(`${args.host}:${args.port}`);
   },
 });
 ```
 
-### 値の優先順位
-
-同じ `port` に対して複数のソースから値を指定できる。上が最優先。
+この1つの定義だけで、CLI フラグ・環境変数・設定ファイル・デフォルト値のすべてが統合される。
 
 ```
-CLI flag        my-app serve --port 8080
-env             MYAPP_SERVE_PORT=5000
-config file     { "serve": { "port": 4000 } }
+CLI flag        my-app serve --port 8080           ← 最優先
+env             MYAPP_SERVE_PORT=5000              ← prefix + コマンドパス + arg 名で自動導出
+config file     { "serve": { "port": 4000 } }     ← コマンドツリーと同じ構造
 default         3000
 ```
 
 どのソースから来た値も、最終的に同じ Zod スキーマでバリデーションされる。
+
+### 環境変数の自動マッピング
+
+`autoEnv` を指定すると、コマンドパス + arg 名から環境変数名を自動導出する。
+
+```ts
+const cli = createCLI({
+  name: "my-app",
+  autoEnv: { prefix: "MYAPP" },
+});
+```
+
+| コマンド      | arg     | 自動導出される env 名     |
+| ------------- | ------- | ------------------------- |
+| `serve`       | `port`  | `MYAPP_SERVE_PORT`        |
+| `remote push` | `force` | `MYAPP_REMOTE_PUSH_FORCE` |
+
+### 設定ファイルの自動マッピング
+
+config ファイルの JSON 構造はコマンドツリーと一致する。
+
+```json
+{
+  "serve": { "port": 5000, "host": "0.0.0.0" },
+  "remote": { "push": { "force": true } }
+}
+```
+
+```
+my-app --config app.json serve
+```
 
 ### ヘルプ自動生成
 
