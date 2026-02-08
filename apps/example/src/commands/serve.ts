@@ -9,13 +9,11 @@ export default defineCommand({
       description: "ポート番号",
       alias: "p",
       default: 3000,
-      env: "PORT",
     },
     host: {
       type: z.string(),
       description: "ホスト名",
       default: "localhost",
-      env: "HOST",
     },
     verbose: {
       type: z.boolean(),
