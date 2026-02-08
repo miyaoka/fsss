@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
 
 const ENTRY = resolve(import.meta.dirname, "__fixtures__/cli-entry.ts");
+const CONFIG_PATH = resolve(import.meta.dirname, "__fixtures__/test-config.json");
 
 async function runCLI(
   ...args: string[]
@@ -88,17 +89,17 @@ describe("serve", () => {
     expect(stdout).not.toContain("verbose");
   });
 
-  test("環境変数 PORT から値を取得する", async () => {
-    const { stdout } = await runCLIWithEnv({ PORT: "9090" }, "serve");
+  test("自動導出 env TEST_SERVE_PORT から値を取得する", async () => {
+    const { stdout } = await runCLIWithEnv({ TEST_SERVE_PORT: "9090" }, "serve");
     expect(stdout).toBe("localhost:9090");
   });
 
   test("CLI フラグが環境変数より優先される", async () => {
-    const { stdout } = await runCLIWithEnv({ PORT: "9090" }, "serve", "--port", "4000");
+    const { stdout } = await runCLIWithEnv({ TEST_SERVE_PORT: "9090" }, "serve", "--port", "4000");
     expect(stdout).toBe("localhost:4000");
   });
 
-  test("--help でヘルプを表示する", async () => {
+  test("--help でヘルプを表示する（自動導出 env 名を含む）", async () => {
     const { stdout, exitCode } = await runCLI("serve", "--help");
     expect(stdout).toContain("サーバーを起動する");
     expect(stdout).toContain("Usage: test-cli serve");
@@ -106,6 +107,8 @@ describe("serve", () => {
     expect(stdout).toContain("--host");
     expect(stdout).toContain("--verbose");
     expect(stdout).toContain("--help");
+    expect(stdout).toContain("env: TEST_SERVE_PORT");
+    expect(stdout).toContain("env: TEST_SERVE_HOST");
     expect(exitCode).toBe(0);
   });
 
@@ -200,5 +203,42 @@ describe("remote", () => {
     expect(stderr).toContain("Error:");
     expect(stderr).toContain("branch");
     expect(exitCode).toBe(1);
+  });
+});
+
+// --- config ファイル ---
+
+describe("config", () => {
+  test("--config で config ファイルから値を読み込む", async () => {
+    const { stdout, exitCode } = await runCLI("--config", CONFIG_PATH, "serve");
+    expect(stdout).toBe("0.0.0.0:5000");
+    expect(exitCode).toBe(0);
+  });
+
+  test("--config=path 記法で config ファイルから値を読み込む", async () => {
+    const { stdout, exitCode } = await runCLI(`--config=${CONFIG_PATH}`, "serve");
+    expect(stdout).toBe("0.0.0.0:5000");
+    expect(exitCode).toBe(0);
+  });
+
+  test("-c 短縮形で config ファイルから値を読み込む", async () => {
+    const { stdout, exitCode } = await runCLI("-c", CONFIG_PATH, "serve");
+    expect(stdout).toBe("0.0.0.0:5000");
+    expect(exitCode).toBe(0);
+  });
+
+  test("CLI フラグが config より優先される", async () => {
+    const { stdout } = await runCLI("--config", CONFIG_PATH, "serve", "--port", "8080");
+    expect(stdout).toBe("0.0.0.0:8080");
+  });
+
+  test("env が config より優先される", async () => {
+    const { stdout } = await runCLIWithEnv(
+      { TEST_SERVE_PORT: "9090" },
+      "--config",
+      CONFIG_PATH,
+      "serve",
+    );
+    expect(stdout).toBe("0.0.0.0:9090");
   });
 });

@@ -1,3 +1,4 @@
+import { deriveEnvName } from "./auto-mapping";
 import type { AvailableEntry } from "./router";
 import type { ArgDef, ArgsDefs } from "./types";
 import { isBooleanSchema } from "./zod-utils";
@@ -7,6 +8,7 @@ interface HelpConfig {
   commandPath: string[];
   description?: string;
   argsDefs?: ArgsDefs;
+  envPrefix?: string;
 }
 
 const INDENT = "  ";
@@ -17,11 +19,27 @@ interface OptionLine {
   right: string;
 }
 
-function formatOptionMeta(def: ArgDef): string {
+// env 名を解決する（明示指定 > 自動導出 > なし）
+function resolveEnvNameForHelp(
+  def: ArgDef,
+  envPrefix: string | undefined,
+  commandPath: string[],
+  argName: string,
+): string | undefined {
+  if (def.env !== undefined) {
+    return def.env;
+  }
+  if (envPrefix !== undefined) {
+    return deriveEnvName(envPrefix, commandPath, argName);
+  }
+  return undefined;
+}
+
+function formatOptionMeta(def: ArgDef, envName: string | undefined): string {
   const parts: string[] = [];
 
-  if (def.env !== undefined) {
-    parts.push(`env: ${def.env}`);
+  if (envName !== undefined) {
+    parts.push(`env: ${envName}`);
   }
   if ("default" in def && def.default !== undefined) {
     parts.push(`default: ${String(def.default)}`);
@@ -33,13 +51,19 @@ function formatOptionMeta(def: ArgDef): string {
   return ` (${parts.join(", ")})`;
 }
 
-function formatOptionLine(name: string, def: ArgDef): OptionLine {
+function formatOptionLine(
+  name: string,
+  def: ArgDef,
+  envPrefix: string | undefined,
+  commandPath: string[],
+): OptionLine {
   const isBoolean = isBooleanSchema(def.type);
   const valuePlaceholder = isBoolean ? "" : ` <${name}>`;
 
   const aliasPrefix = def.alias !== undefined ? `-${def.alias}, ` : "    ";
   const left = `${aliasPrefix}--${name}${valuePlaceholder}`;
-  const right = `${def.description}${formatOptionMeta(def)}`;
+  const envName = resolveEnvNameForHelp(def, envPrefix, commandPath, name);
+  const right = `${def.description}${formatOptionMeta(def, envName)}`;
 
   return { left, right };
 }
@@ -52,7 +76,7 @@ function formatHelpLine(): OptionLine {
 }
 
 function generateHelp(config: HelpConfig): string {
-  const { programName, commandPath, description, argsDefs } = config;
+  const { programName, commandPath, description, argsDefs, envPrefix } = config;
   const lines: string[] = [];
 
   if (description !== undefined) {
@@ -99,7 +123,9 @@ function generateHelp(config: HelpConfig): string {
 
   lines.push("Options:");
 
-  const optionLines = optionEntries.map(([name, def]) => formatOptionLine(name, def));
+  const optionLines = optionEntries.map(([name, def]) =>
+    formatOptionLine(name, def, envPrefix, commandPath),
+  );
   optionLines.push(formatHelpLine());
 
   // 左揃えのための最大幅を計算

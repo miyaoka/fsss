@@ -1,17 +1,19 @@
 # 内部アーキテクチャ
 
-fsss の内部は **Router → Parser → Resolver → Validator** のパイプラインで構成される。各モジュールは前段の出力だけを受け取り、後段に渡す。
+fsss の内部は **extractFrameworkFlags → Router → Parser → Resolver → Validator** のパイプラインで構成される。各モジュールは前段の出力だけを受け取り、後段に渡す。
 
 ```mermaid
 flowchart TD
   argv["process.argv"]
+  extract["extractFrameworkFlags<br/>--config / -c 抽出"]
   router["Router<br/>コマンド解決"]
   parser["Parser<br/>トークン分類"]
   resolver["Resolver<br/>値の解決"]
   validator["Validator<br/>型変換・検証"]
   handler["Handler<br/>run()"]
 
-  argv --> router
+  argv --> extract
+  extract -- "残りトークン" --> router
   router -- "残りトークン" --> parser
   parser -- "flags / positionals" --> resolver
   resolver -- "生の値" --> validator
@@ -98,7 +100,21 @@ args 定義の各フィールドに対し、複数のソースから値を探索
 ### 責務
 
 - args 定義を走査し、各フィールドの値をソースの優先順位で解決する
+- `commandPath` と `envPrefix` を受け取り、env 名と config パスを自動導出する
 - **値はすべて生のまま渡す。型変換は行わない**
+
+### env 名の解決
+
+- `def.env` が明示指定されている → そのまま使う
+- `envPrefix` あり + `def.env` 未指定 → `deriveEnvName(prefix, commandPath, argName)` で自動導出
+- `envPrefix` なし + `def.env` 未指定 → env を参照しない
+
+### config パスの解決
+
+config パスは `autoEnv` とは独立して常に自動導出される。
+
+- `def.config` が明示指定されている → そのまま使う
+- `def.config` 未指定 → `deriveConfigPath(commandPath, argName)` で自動導出
 
 ### ソースの優先順位
 
@@ -187,23 +203,23 @@ serve コマンド定義: `port` は `z.coerce.number()`、`host` は `z.string(
 | **Resolver**  | `port`: CLI フラグ `"a3000"`、`host`: default、`verbose`: default             | `{port: "a3000", host: "localhost", verbose: false}` |
 | **Validator** | `port`: `Number("a3000")` → `NaN` → `z.coerce.number()` が `NaN` をリジェクト | ZodError → stderr にエラー + ヘルプ表示、exit 1      |
 
-### `PORT=9090 serve`（環境変数）
+### `MYAPP_SERVE_PORT=9090 serve`（環境変数・autoEnv）
 
-| Stage         | 処理                                           | 結果                                                |
-| ------------- | ---------------------------------------------- | --------------------------------------------------- |
-| **Router**    | `"serve"` → `serve.ts` にマッチ                | remainingTokens: `[]`                               |
-| **Parser**    | トークンなし                                   | flags: `{}`、positionals: `[]`                      |
-| **Resolver**  | `port`: CLI フラグなし → env `PORT` = `"9090"` | `{port: "9090", host: "localhost", verbose: false}` |
-| **Validator** | `port`: `Number("9090")` → `9090`              | `{port: 9090, host: "localhost", verbose: false}`   |
+| Stage         | 処理                                                       | 結果                                                |
+| ------------- | ---------------------------------------------------------- | --------------------------------------------------- |
+| **Router**    | `"serve"` → `serve.ts` にマッチ                            | remainingTokens: `[]`                               |
+| **Parser**    | トークンなし                                               | flags: `{}`、positionals: `[]`                      |
+| **Resolver**  | `port`: CLI フラグなし → env `MYAPP_SERVE_PORT` = `"9090"` | `{port: "9090", host: "localhost", verbose: false}` |
+| **Validator** | `port`: `Number("9090")` → `9090`                          | `{port: 9090, host: "localhost", verbose: false}`   |
 
-### `PORT=9090 serve -p 4000`（CLI フラグが環境変数に勝つ）
+### `MYAPP_SERVE_PORT=9090 serve -p 4000`（CLI フラグが環境変数に勝つ）
 
-| Stage         | 処理                                                             | 結果                                                |
-| ------------- | ---------------------------------------------------------------- | --------------------------------------------------- |
-| **Router**    | `"serve"` → `serve.ts` にマッチ                                  | remainingTokens: `["-p", "4000"]`                   |
-| **Parser**    | `-p` → `port`                                                    | flags: `{port: ["4000"]}`                           |
-| **Resolver**  | `port`: CLI フラグ `"4000"` が見つかる → env `PORT` は探索しない | `{port: "4000", host: "localhost", verbose: false}` |
-| **Validator** | `port`: `Number("4000")` → `4000`                                | `{port: 4000, host: "localhost", verbose: false}`   |
+| Stage         | 処理                                                                         | 結果                                                |
+| ------------- | ---------------------------------------------------------------------------- | --------------------------------------------------- |
+| **Router**    | `"serve"` → `serve.ts` にマッチ                                              | remainingTokens: `["-p", "4000"]`                   |
+| **Parser**    | `-p` → `port`                                                                | flags: `{port: ["4000"]}`                           |
+| **Resolver**  | `port`: CLI フラグ `"4000"` が見つかる → env `MYAPP_SERVE_PORT` は探索しない | `{port: "4000", host: "localhost", verbose: false}` |
+| **Validator** | `port`: `Number("4000")` → `4000`                                            | `{port: 4000, host: "localhost", verbose: false}`   |
 
 ### `remote origin push main --force`（動的セグメント + 位置引数 + フラグ）
 
@@ -224,6 +240,21 @@ serve コマンド定義: `port` は `z.coerce.number()`、`host` は `z.string(
 | **Parser**    | 両方とも位置引数                                             | positionals: `["foo", "bar"]`     |
 | **Resolver**  | `key`: positional[0] `"foo"`、`value`: positional[1] `"bar"` | `{key: "foo", value: "bar"}`      |
 | **Validator** | 両方 string、変換不要                                        | `{key: "foo", value: "bar"}`      |
+
+### `--config app.json serve`（config ファイル）
+
+config ファイル: `{ "serve": { "port": 5000, "host": "0.0.0.0" } }`
+
+| Stage         | 処理                                                                            | 結果                                            |
+| ------------- | ------------------------------------------------------------------------------- | ----------------------------------------------- |
+| **Framework** | `--config app.json` を抽出                                                      | configPath: `"app.json"`                        |
+| **Router**    | `"serve"` → `serve.ts` にマッチ                                                 | remainingTokens: `[]`                           |
+| **Parser**    | トークンなし                                                                    | flags: `{}`、positionals: `[]`                  |
+| **Resolver**  | `port`: config `serve.port` = `5000`、`host`: config `serve.host` = `"0.0.0.0"` | `{port: 5000, host: "0.0.0.0", verbose: false}` |
+| **Validator** | `port`: 数値なので変換不要                                                      | `{port: 5000, host: "0.0.0.0", verbose: false}` |
+
+> [!NOTE]
+> config ファイルの JSON は型を持つ（数値は `number`、真偽値は `boolean`）。文字列→型変換は不要で、Resolver がそのまま渡す。
 
 ## エラー時の出力先
 

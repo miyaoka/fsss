@@ -1,6 +1,6 @@
-import { basename, relative, resolve } from "node:path";
+import { relative, resolve } from "node:path";
 import { ZodError } from "zod";
-import { loadConfig } from "./config";
+import { loadMergedConfig } from "./config";
 import { generateHelp, generateSubcommandHelp, generateValidationErrorHelp } from "./help";
 import { parseTokens } from "./parser";
 import type { ParserConfig } from "./parser";
@@ -10,10 +10,14 @@ import type { ArgsDefs, CommandConfig } from "./types";
 import { validateArgs } from "./validator";
 import { isBooleanSchema } from "./zod-utils";
 
+interface AutoEnvConfig {
+  prefix: string;
+}
+
 interface CLIOptions {
+  name: string;
   commandsDir?: string;
-  name?: string;
-  configPath?: string;
+  autoEnv?: AutoEnvConfig;
 }
 
 interface CLI {
@@ -60,13 +64,54 @@ function extractPartialCommandPath(commandsDir: string, stoppedDir: string): str
   return segments.filter((s) => !s.startsWith("["));
 }
 
-function createCLI(options?: CLIOptions): CLI {
-  const commandsDir = options?.commandsDir ?? DEFAULT_COMMANDS_DIR;
-  const programName = options?.name ?? basename(process.argv[1] ?? "cli");
-  const configPath = options?.configPath;
+// argv からフレームワークフラグ（--config / -c）を抽出する
+// サブコマンドの前に配置されるグローバルフラグを処理する
+// 残りのトークンは router に渡される
+interface FrameworkFlags {
+  configPath: string | undefined;
+  remainingTokens: string[];
+}
+
+function extractFrameworkFlags(tokens: string[]): FrameworkFlags {
+  let configPath: string | undefined;
+  const remaining: string[] = [];
+
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+
+    // --config=path.json
+    if (token.startsWith("--config=")) {
+      configPath = token.slice("--config=".length);
+      continue;
+    }
+
+    // --config path.json / -c path.json
+    if (token === "--config" || token === "-c") {
+      const nextToken = tokens[i + 1];
+      if (nextToken === undefined) {
+        throw new Error("--config requires a file path");
+      }
+      configPath = nextToken;
+      i++;
+      continue;
+    }
+
+    remaining.push(token);
+  }
+
+  return { configPath, remainingTokens: remaining };
+}
+
+function createCLI(options: CLIOptions): CLI {
+  const commandsDir = options.commandsDir ?? DEFAULT_COMMANDS_DIR;
+  const programName = options.name;
+  const envPrefix = options.autoEnv?.prefix;
 
   async function run(): Promise<void> {
-    const tokens = process.argv.slice(ARGV_SKIP);
+    const rawTokens = process.argv.slice(ARGV_SKIP);
+
+    // フレームワークフラグの抽出（--config / -c）
+    const { configPath, remainingTokens: tokens } = extractFrameworkFlags(rawTokens);
 
     // ルーティング
     const routeResult = await resolveRoute(commandsDir, tokens);
@@ -96,6 +141,7 @@ function createCLI(options?: CLIOptions): CLI {
       commandPath,
       description: commandConfig.description,
       argsDefs: Object.keys(argsDefs).length > 0 ? argsDefs : undefined,
+      envPrefix,
     });
 
     // --help / -h チェック
@@ -114,12 +160,14 @@ function createCLI(options?: CLIOptions): CLI {
     let args: Record<string, unknown>;
     try {
       const parsedTokens = parseTokens(routeResult.remainingTokens, parserConfig);
-      const config = configPath !== undefined ? await loadConfig(configPath) : undefined;
+      const config = await loadMergedConfig(programName, configPath);
       const rawValues = resolveValues({
         argsDefs,
         parsedTokens,
         env: process.env,
         config,
+        commandPath,
+        envPrefix,
       });
       args = validateArgs(argsDefs, rawValues);
     } catch (error) {
