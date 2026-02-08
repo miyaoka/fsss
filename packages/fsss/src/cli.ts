@@ -89,18 +89,20 @@ function createCLI(options?: CLIOptions): CLI {
 
     const argsDefs = commandConfig.args ?? {};
 
+    // ヘルプ生成（--help 表示・エラー表示で共通）
+    const commandPath = extractCommandPath(commandsDir, routeResult.filePath);
+    const helpText = generateHelp({
+      programName,
+      commandPath,
+      description: commandConfig.description,
+      argsDefs: Object.keys(argsDefs).length > 0 ? argsDefs : undefined,
+    });
+
     // --help / -h チェック
     if (
       routeResult.remainingTokens.includes("--help") ||
       routeResult.remainingTokens.includes("-h")
     ) {
-      const commandPath = extractCommandPath(commandsDir, routeResult.filePath);
-      const helpText = generateHelp({
-        programName,
-        commandPath,
-        description: commandConfig.description,
-        argsDefs: Object.keys(argsDefs).length > 0 ? argsDefs : undefined,
-      });
       console.log(helpText);
       return;
     }
@@ -108,37 +110,28 @@ function createCLI(options?: CLIOptions): CLI {
     // パーサー設定の構築
     const parserConfig = buildParserConfig(argsDefs);
 
-    // トークンパース
-    const parsedTokens = parseTokens(routeResult.remainingTokens, parserConfig);
-
-    // 設定ファイル読み込み
-    const config = configPath !== undefined ? await loadConfig(configPath) : undefined;
-
-    // 値の解決
-    const rawValues = resolveValues({
-      argsDefs,
-      parsedTokens,
-      env: process.env,
-      config,
-    });
-
-    // バリデーション（失敗時はヘルプを表示）
+    // パース → 解決 → バリデーション（失敗時はヘルプを表示）
     let args: Record<string, unknown>;
     try {
+      const parsedTokens = parseTokens(routeResult.remainingTokens, parserConfig);
+      const config = configPath !== undefined ? await loadConfig(configPath) : undefined;
+      const rawValues = resolveValues({
+        argsDefs,
+        parsedTokens,
+        env: process.env,
+        config,
+      });
       args = validateArgs(argsDefs, rawValues);
     } catch (error) {
       if (error instanceof ZodError) {
-        const commandPath = extractCommandPath(commandsDir, routeResult.filePath);
-        const helpText = generateHelp({
-          programName,
-          commandPath,
-          description: commandConfig.description,
-          argsDefs: Object.keys(argsDefs).length > 0 ? argsDefs : undefined,
-        });
         const errorMessages = error.issues.map(
           (issue) => `${issue.path.join(".")}: ${issue.message}`,
         );
         console.error(generateValidationErrorHelp(helpText, errorMessages));
+        process.exit(EXIT_CODE_ERROR);
+      }
+      if (error instanceof Error) {
+        console.error(generateValidationErrorHelp(helpText, [error.message]));
         process.exit(EXIT_CODE_ERROR);
       }
       throw error;

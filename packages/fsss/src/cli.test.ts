@@ -121,6 +121,13 @@ describe("serve", () => {
     expect(stderr).toContain("Usage:");
     expect(exitCode).toBe(1);
   });
+
+  test("値が必要なフラグに値を渡さないとエラーヘルプを表示する", async () => {
+    const { stderr, exitCode } = await runCLI("serve", "-p");
+    expect(stderr).toContain("Error:");
+    expect(stderr).toContain("Usage:");
+    expect(exitCode).toBe(1);
+  });
 });
 
 // --- config コマンド ---
