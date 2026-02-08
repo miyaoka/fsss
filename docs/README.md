@@ -5,4 +5,4 @@
 - [設定ファイルと環境変数](config.md) — autoEnv、config ファイル階層、`--config` フラグ
 - [プラグインシステム](plugin.md) — `_plugins/` 規約、ミドルウェア、Extensions の型生成
 - [内部アーキテクチャ](architecture.md) — パイプライン設計、各モジュールの責務、処理トレース
-- [既存ツールとの比較](comparison.md) — commander / oclif / Pastel / Gud CLI / convict との比較
+- [既存ツールとの比較](comparison.md) — commander / oclif / Pastel / Gud CLI / gunshi / convict との比較

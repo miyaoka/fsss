@@ -108,10 +108,53 @@ Options:
   -h, --help         ヘルプを表示する
 ```
 
-## ドキュメント
+## Plugin — `_plugins/` を置くだけで横断的処理を追加
+
+```
+commands/
+  _plugins/
+    logger.ts          ← 全コマンドに適用
+  serve.ts
+  remote/
+    _plugins/
+      auth.ts          ← remote 配下にのみ適用
+    [name]/
+      push.ts
+```
+
+`commands/` ツリーの任意の階層に `_plugins/` を配置するだけで、その階層以下のコマンドにプラグインが自動適用される。
+
+```ts
+// commands/_plugins/logger.ts
+export default definePlugin(({ cliName }) => ({
+  provide: {
+    logger: {
+      info: (msg: string) => console.log(`[${cliName}] ${msg}`),
+    },
+  },
+  middleware: async (_ctx, next) => {
+    const start = performance.now();
+    await next();
+    console.log(`${(performance.now() - start).toFixed(0)}ms`);
+  },
+}));
+```
+
+- `provide` で注入した値はコマンドの `run()` で `extensions` として型付きで受け取れる
+- `middleware` はコマンドの実行を包む onion model（root 側が外側、leaf 側が内側）
+- Extensions の型は `fsss-codegen` で自動生成される
+
+```ts
+run({ extensions }) {
+  extensions.logger.info("hello");
+}
+```
+
+## [ドキュメント](docs/README.md)
 
 - [ファイルベースルーティング](docs/routing.md) — コマンドツリー、動的セグメント、params と args の分離
 - [スキーマと値の解決](docs/schema.md) — defineCommand、args 定義、値の優先順位、ヘルプ生成
 - [設定ファイルと環境変数](docs/config.md) — autoEnv、config ファイル階層、`--config` フラグ
+- [プラグインシステム](docs/plugin.md) — `_plugins/` 規約、ミドルウェア、Extensions の型生成
 - [内部アーキテクチャ](docs/architecture.md) — パイプライン設計、各モジュールの責務、処理トレース
-- [既存ツールとの比較](docs/comparison.md) — commander / oclif / Pastel / Gud CLI / convict との比較
+- [既存ツールとの比較](docs/comparison.md) — commander / oclif / Pastel / Gud CLI / gunshi / convict との比較
