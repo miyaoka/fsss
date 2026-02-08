@@ -54,7 +54,7 @@ importers:
         specifier: 'catalog:'
         version: 7.0.0-dev.20260205.1
       bumpp:
-        specifier: ^10.4.1
+        specifier: 10.4.1
         version: 10.4.1
       lefthook:
         specifier: 2.1.0
