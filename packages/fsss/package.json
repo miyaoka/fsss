@@ -30,6 +30,8 @@
     "dist"
   ],
   "scripts": {
+    "prepack": "cp ../../README.md .",
+    "postpack": "rm README.md",
     "prepare": "vite build",
     "build": "vite build",
     "dev": "vite build --watch",
