@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
 
 const ENTRY = resolve(import.meta.dirname, "__fixtures__/cli-entry.ts");
+const DEFAULT_COMMAND_ENTRY = resolve(import.meta.dirname, "__fixtures__/default-command-entry.ts");
 const CONFIG_PATH = resolve(import.meta.dirname, "__fixtures__/test-config.json");
 
 async function runCLI(
@@ -27,6 +28,21 @@ async function runCLIWithEnv(
     stdout: "pipe",
     stderr: "pipe",
     env: { ...process.env, ...env },
+  });
+  const [stdout, stderr, exitCode] = await Promise.all([
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+    proc.exited,
+  ]);
+  return { stdout: stdout.trim(), stderr: stderr.trim(), exitCode };
+}
+
+async function runDefaultCLI(
+  ...args: string[]
+): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+  const proc = Bun.spawn(["bun", "run", DEFAULT_COMMAND_ENTRY, ...args], {
+    stdout: "pipe",
+    stderr: "pipe",
   });
   const [stdout, stderr, exitCode] = await Promise.all([
     new Response(proc.stdout).text(),
@@ -240,5 +256,71 @@ describe("config", () => {
       "serve",
     );
     expect(stdout).toBe("0.0.0.0:9090");
+  });
+});
+
+// --- defaultCommand ---
+
+describe("defaultCommand", () => {
+  test("引数なしでデフォルトコマンドを実行する", async () => {
+    const { stdout, exitCode } = await runDefaultCLI();
+    expect(stdout).toBe("localhost:3000");
+    expect(exitCode).toBe(0);
+  });
+
+  test("フラグをデフォルトコマンドに渡す", async () => {
+    const { stdout, exitCode } = await runDefaultCLI("--port", "8080");
+    expect(stdout).toBe("localhost:8080");
+    expect(exitCode).toBe(0);
+  });
+
+  test("デフォルトコマンドを直接指定しても通常通り動作する", async () => {
+    const { stdout, exitCode } = await runDefaultCLI("serve");
+    expect(stdout).toBe("localhost:3000");
+    expect(exitCode).toBe(0);
+  });
+
+  test("デフォルトコマンドを直接指定してフラグを渡す", async () => {
+    const { stdout, exitCode } = await runDefaultCLI("serve", "--port", "8080");
+    expect(stdout).toBe("localhost:8080");
+    expect(exitCode).toBe(0);
+  });
+
+  test("別コマンドの実行に影響しない", async () => {
+    const { stdout, exitCode } = await runDefaultCLI("config", "set", "foo", "bar");
+    expect(stdout).toBe("foo=bar");
+    expect(exitCode).toBe(0);
+  });
+
+  test("存在しないコマンドでサブコマンド一覧を表示する", async () => {
+    const { stdout, exitCode } = await runDefaultCLI("nonexistent");
+    expect(stdout).toContain("Available commands:");
+    expect(exitCode).toBe(0);
+  });
+
+  test("--help で統合ヘルプを表示する", async () => {
+    const { stdout, exitCode } = await runDefaultCLI("--help");
+    expect(stdout).toContain("サーバーを起動する");
+    expect(stdout).toContain("--port");
+    expect(stdout).toContain("--host");
+    expect(stdout).toContain("Available commands:");
+    expect(stdout).toContain("serve (default)");
+    expect(stdout).toContain("config");
+    expect(stdout).toContain("remote");
+    expect(exitCode).toBe(0);
+  });
+
+  test("-h で統合ヘルプを表示する", async () => {
+    const { stdout, exitCode } = await runDefaultCLI("-h");
+    expect(stdout).toContain("Available commands:");
+    expect(stdout).toContain("serve (default)");
+    expect(exitCode).toBe(0);
+  });
+
+  test("serve --help は serve 固有のヘルプを表示する", async () => {
+    const { stdout, exitCode } = await runDefaultCLI("serve", "--help");
+    expect(stdout).toContain("Usage: test-cli serve");
+    expect(stdout).not.toContain("Available commands:");
+    expect(exitCode).toBe(0);
   });
 });

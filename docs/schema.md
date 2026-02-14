@@ -91,3 +91,25 @@ Options:
   -v, --verbose      詳細ログ
   -h, --help         ヘルプを表示する
 ```
+
+`defaultCommand` が設定されている場合、`my-app --help` でサブコマンド一覧とデフォルトコマンドの Options を統合表示する。
+
+```
+$ my-app --help
+
+サーバーを起動する
+
+Usage: my-app [options]
+       my-app <command>
+
+Options:
+  -p, --port <port>  ポート番号 (env: MYAPP_SERVE_PORT, default: 3000)
+      --host <host>  ホスト名 (env: MYAPP_SERVE_HOST, default: localhost)
+  -v, --verbose      詳細ログ
+  -h, --help         ヘルプを表示する
+
+Available commands:
+  serve (default)
+  build
+  config
+```

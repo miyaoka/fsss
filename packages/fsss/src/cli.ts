@@ -1,7 +1,12 @@
 import { relative, resolve } from "node:path";
 import { ZodError } from "zod";
 import { loadMergedConfig } from "./config";
-import { generateHelp, generateSubcommandHelp, generateValidationErrorHelp } from "./help";
+import {
+  generateDefaultCommandHelp,
+  generateHelp,
+  generateSubcommandHelp,
+  generateValidationErrorHelp,
+} from "./help";
 import { parseTokens } from "./parser";
 import type { ParserConfig } from "./parser";
 import { buildMiddlewareChain, scanPluginsAlongPath } from "./plugin";
@@ -19,6 +24,7 @@ interface CLIOptions {
   name: string;
   commandsDir?: string;
   autoEnv?: AutoEnvConfig;
+  defaultCommand?: string;
 }
 
 interface CLI {
@@ -107,6 +113,7 @@ function createCLI(options: CLIOptions): CLI {
   const commandsDir = options.commandsDir ?? DEFAULT_COMMANDS_DIR;
   const programName = options.name;
   const envPrefix = options.autoEnv?.prefix;
+  const defaultCommand = options.defaultCommand;
 
   async function run(): Promise<void> {
     const rawTokens = process.argv.slice(ARGV_SKIP);
@@ -115,18 +122,57 @@ function createCLI(options: CLIOptions): CLI {
     const { configPath, remainingTokens: tokens } = extractFrameworkFlags(rawTokens);
 
     // ルーティング
-    const routeResult = await resolveRoute(commandsDir, tokens);
+    let routeResult = await resolveRoute(commandsDir, tokens);
 
-    // ルート未解決 → サブコマンド一覧ヘルプを表示
+    // ルート未解決時の処理
     if (routeResult.kind === "unresolved") {
-      const commandPath = extractPartialCommandPath(commandsDir, routeResult.stoppedDir);
-      const helpText = generateSubcommandHelp({
-        programName,
-        commandPath,
-        availableEntries: routeResult.availableEntries,
-      });
-      console.log(helpText);
-      return;
+      const isRootLevel = resolve(routeResult.stoppedDir) === resolve(commandsDir);
+      // 先頭トークンがコマンド名候補（フラグでない文字列）の場合、
+      // 存在しないコマンド名なので defaultCommand に fallback しない
+      const hasUnmatchedCommand = tokens.length > 0 && !tokens[0].startsWith("-");
+
+      if (isRootLevel && defaultCommand !== undefined && !hasUnmatchedCommand) {
+        // --help / -h → サブコマンド一覧 + デフォルトコマンドの Options を統合表示
+        if (tokens.includes("--help") || tokens.includes("-h")) {
+          const defaultRouteResult = await resolveRoute(commandsDir, [defaultCommand]);
+          if (defaultRouteResult.kind === "unresolved") {
+            throw new Error(`defaultCommand "${defaultCommand}" does not match any command file`);
+          }
+          const commandModule = await import(defaultRouteResult.filePath);
+          const commandConfig: CommandConfig = commandModule.default;
+          const argsDefs = commandConfig.args ?? {};
+          const commandPath = extractCommandPath(commandsDir, defaultRouteResult.filePath);
+          const helpText = generateDefaultCommandHelp({
+            programName,
+            defaultCommandName: defaultCommand,
+            commandPath,
+            description: commandConfig.description,
+            argsDefs: Object.keys(argsDefs).length > 0 ? argsDefs : undefined,
+            envPrefix,
+            availableEntries: routeResult.availableEntries,
+          });
+          console.log(helpText);
+          return;
+        }
+
+        // デフォルトコマンドのトークンを先頭に挿入して再解決
+        const retryResult = await resolveRoute(commandsDir, [defaultCommand, ...tokens]);
+        if (retryResult.kind === "unresolved") {
+          throw new Error(`defaultCommand "${defaultCommand}" does not match any command file`);
+        }
+        routeResult = retryResult;
+      } else {
+        // defaultCommand なし or root 以外 or 未マッチのコマンド名あり
+        // → 従来通りサブコマンド一覧ヘルプを表示
+        const commandPath = extractPartialCommandPath(commandsDir, routeResult.stoppedDir);
+        const helpText = generateSubcommandHelp({
+          programName,
+          commandPath,
+          availableEntries: routeResult.availableEntries,
+        });
+        console.log(helpText);
+        return;
+      }
     }
 
     // コマンドファイルの動的 import

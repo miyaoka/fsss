@@ -55,7 +55,32 @@ flowchart TD
 ```
 
 - **Resolved** — コマンドファイルが見つかった。パイプラインの後段へ進む
-- **Unresolved** — コマンドが見つからなかった。停止したディレクトリのサブコマンド一覧をヘルプとして表示し、パイプラインはここで終了する
+- **Unresolved** — コマンドが見つからなかった。`defaultCommand` が設定されていれば再解決を試み、なければサブコマンド一覧をヘルプとして表示してパイプラインはここで終了する
+
+### defaultCommand による再解決
+
+`createCLI` に `defaultCommand` が設定されている場合、Unresolved かつ root レベルで以下のフォールバックが発動する。
+
+```mermaid
+flowchart TD
+  unresolved["RouteUnresolved"]
+  rootCheck{"root レベル<br/>かつ defaultCommand あり?"}
+  cmdCheck{"先頭トークンが<br/>コマンド名候補?"}
+  helpCheck{"--help / -h?"}
+  retry["defaultCommand を<br/>トークン先頭に挿入<br/>して再解決"]
+  integratedHelp["統合ヘルプ表示<br/>Options + Available commands"]
+  subcommandHelp["サブコマンド一覧ヘルプ"]
+  continue["Resolved として<br/>パイプライン続行"]
+
+  unresolved --> rootCheck
+  rootCheck -- "No" --> subcommandHelp
+  rootCheck -- "Yes" --> cmdCheck
+  cmdCheck -- "Yes<br/>(存在しないコマンド名)" --> subcommandHelp
+  cmdCheck -- "No<br/>(フラグ or 空)" --> helpCheck
+  helpCheck -- "Yes" --> integratedHelp
+  helpCheck -- "No" --> retry
+  retry --> continue
+```
 
 ### 走査の例
 
@@ -285,6 +310,18 @@ config ファイル: `{ "serve": { "port": 5000, "host": "0.0.0.0" } }`
 
 > [!NOTE]
 > config ファイルの JSON は型を持つ（数値は `number`、真偽値は `boolean`）。文字列→型変換は不要で、Resolver がそのまま渡す。
+
+### `--port 8080`（defaultCommand: "serve"）
+
+`defaultCommand` が設定された CLI で、コマンド名なしにフラグを渡した場合。
+
+| Stage         | 処理                                                                  | 結果                                                |
+| ------------- | --------------------------------------------------------------------- | --------------------------------------------------- |
+| **Router**    | `"--port"` はフラグ → ルーティング即停止 → Unresolved                 | stoppedDir: `commands/`                             |
+| **Fallback**  | root レベル + defaultCommand → `["serve", "--port", "8080"]` で再解決 | `serve.ts` に Resolved                              |
+| **Parser**    | `--port` → `port`                                                     | flags: `{port: ["8080"]}`                           |
+| **Resolver**  | `port`: CLI フラグ `"8080"`                                           | `{port: "8080", host: "localhost", verbose: false}` |
+| **Validator** | `port`: `Number("8080")` → `8080`                                     | `{port: 8080, host: "localhost", verbose: false}`   |
 
 ## エラー時の出力先
 

@@ -5,7 +5,7 @@ import { createCLI } from "@miyaoka/fsss";
 
 const cli = createCLI({
   // CLI 名（必須）。ヘルプの Usage 表示と config ファイル名に使われる
-  name: "fsss-example",
+  name: "fsss-full",
   // commands/ ディレクトリのパス（デフォルト: "commands"）
   commandsDir: join(import.meta.dirname, "commands"),
   // 自動 env マッピング。指定すると EXAMPLE_SERVE_PORT のように prefix 付きで自動導出される

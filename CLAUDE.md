@@ -23,7 +23,7 @@ bun + TypeScript ネイティブ。
 ```
 fsss/
 ├── packages/fsss/     # フレームワーク本体（npm publish 対象）
-└── apps/example/      # サンプル CLI アプリ（動作確認・テスト用）
+└── examples/full/         # サンプル CLI アプリ（全機能版）
 ```
 
 ## フレームワーク内部のモジュール構成

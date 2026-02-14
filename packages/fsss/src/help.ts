@@ -178,5 +178,89 @@ function generateValidationErrorHelp(helpText: string, errors: string[]): string
   return lines.join("\n");
 }
 
-export { generateHelp, generateSubcommandHelp, generateValidationErrorHelp };
-export type { HelpConfig, SubcommandHelpConfig };
+// defaultCommand 設定時のルートヘルプを生成する
+// サブコマンド一覧 + デフォルトコマンドの Options を統合表示する
+interface DefaultCommandHelpConfig {
+  programName: string;
+  defaultCommandName: string;
+  commandPath: string[];
+  description?: string;
+  argsDefs?: ArgsDefs;
+  envPrefix?: string;
+  availableEntries: AvailableEntry[];
+}
+
+function generateDefaultCommandHelp(config: DefaultCommandHelpConfig): string {
+  const {
+    programName,
+    defaultCommandName,
+    commandPath,
+    description,
+    argsDefs,
+    envPrefix,
+    availableEntries,
+  } = config;
+  const lines: string[] = [];
+
+  if (description !== undefined) {
+    lines.push(description);
+    lines.push("");
+  }
+
+  // Usage 行（options + command の2行）
+  const hasFlags =
+    argsDefs !== undefined && Object.entries(argsDefs).some(([, def]) => def.positional !== true);
+  if (hasFlags) {
+    lines.push(`Usage: ${programName} [options]`);
+  } else {
+    lines.push(`Usage: ${programName}`);
+  }
+  lines.push(`       ${programName} <command>`);
+  lines.push("");
+
+  // Options セクション（デフォルトコマンドの args から生成）
+  if (argsDefs !== undefined) {
+    const entries = Object.entries(argsDefs);
+    const optionEntries = entries.filter(([, def]) => def.positional !== true);
+
+    if (optionEntries.length > 0) {
+      lines.push("Options:");
+
+      const optionLines = optionEntries.map(([name, def]) =>
+        formatOptionLine(name, def, envPrefix, commandPath),
+      );
+      optionLines.push(formatHelpLine());
+
+      const maxLeftWidth = Math.max(...optionLines.map((l) => l.left.length));
+
+      for (const line of optionLines) {
+        const padding = " ".repeat(maxLeftWidth - line.left.length + COLUMN_GAP);
+        lines.push(`${INDENT}${line.left}${padding}${line.right}`);
+      }
+      lines.push("");
+    }
+  }
+
+  // Available commands セクション
+  if (availableEntries.length > 0) {
+    lines.push("Available commands:");
+    for (const entry of availableEntries) {
+      if (entry.isDynamic) {
+        lines.push(`${INDENT}<${entry.paramName}>`);
+        continue;
+      }
+      const suffix = entry.name === defaultCommandName ? " (default)" : "";
+      lines.push(`${INDENT}${entry.name}${suffix}`);
+    }
+  }
+
+  return lines.join("\n");
+}
+
+export {
+  generateDefaultCommandHelp,
+  generateHelp,
+  generateSubcommandHelp,
+  generateValidationErrorHelp,
+};
+export type { DefaultCommandHelpConfig, HelpConfig, SubcommandHelpConfig };
