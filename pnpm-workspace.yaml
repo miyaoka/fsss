@@ -9,7 +9,7 @@ catalog:
   '@typescript/native-preview': 7.0.0-dev.20260210.1
   oxfmt: 0.28.0
   oxlint: 1.43.0
-  oxlint-tsgolint: 0.11.5
+  oxlint-tsgolint: 0.12.0
   typescript: 5.9.3
   unplugin-dts: 1.0.0-beta.6
   vite: 8.0.0-beta.13
