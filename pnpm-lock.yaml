@@ -13,8 +13,8 @@ catalogs:
       specifier: 1.3.9
       version: 1.3.9
     '@types/node':
-      specifier: 24.10.12
-      version: 24.10.12
+      specifier: 24.10.13
+      version: 24.10.13
     '@typescript/native-preview':
       specifier: 7.0.0-dev.20260211.1
       version: 7.0.0-dev.20260211.1
@@ -49,7 +49,7 @@ importers:
         version: 24.0.4
       '@types/node':
         specifier: 'catalog:'
-        version: 24.10.12
+        version: 24.10.13
       '@typescript/native-preview':
         specifier: 'catalog:'
         version: 7.0.0-dev.20260211.1
@@ -547,8 +547,8 @@ packages:
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
-  '@types/node@24.10.12':
-    resolution: {integrity: sha512-68e+T28EbdmLSTkPgs3+UacC6rzmqrcWFPQs1C8mwJhI/r5Uxr0yEuQotczNRROd1gq30NGxee+fo0rSIxpyAw==}
+  '@types/node@24.10.13':
+    resolution: {integrity: sha512-oH72nZRfDv9lADUBSo104Aq7gPHpQZc4BTx38r9xf9pg5LfP6EzSyH2n7qFmmxRQXh7YlUXODcYsg6PuTDSxGg==}
 
   '@types/node@25.2.0':
     resolution: {integrity: sha512-DZ8VwRFUNzuqJ5khrvwMXHmvPe+zGayJhr2CDNiKB1WBE1ST8Djl00D0IC4vvNmHMdj6DlbYRIaFE7WHjlDl5w==}
@@ -1305,7 +1305,7 @@ snapshots:
 
   '@types/estree@1.0.8': {}
 
-  '@types/node@24.10.12':
+  '@types/node@24.10.13':
     dependencies:
       undici-types: 7.16.0
 
