@@ -1,6 +1,6 @@
 {
   "name": "@miyaoka/fsss",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "A CLI framework where your file structure becomes your command structure, and a single schema gives you typed values whether they come from flags, env vars, or config files.",
   "type": "module",
   "author": "miyaoka",
