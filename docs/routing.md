@@ -56,6 +56,51 @@ commands/
 
 ルーターが解決するのはコマンドファイルの特定まで。残りのトークンはパーサーとリゾルバーの仕事。
 
+## デフォルトコマンド
+
+`createCLI` の `defaultCommand` オプションで、引数なし・フラグのみの実行時にフォールバックするコマンドを指定できる。
+
+```ts
+const cli = createCLI({
+  name: "my-app",
+  commandsDir: join(import.meta.dirname, "commands"),
+  defaultCommand: "serve",
+});
+```
+
+```
+my-app                → serve を実行（デフォルトコマンド）
+my-app --port 8080    → serve --port 8080 として実行
+my-app serve          → serve を直接実行（通常通り）
+my-app build          → build を直接実行（影響なし）
+my-app nonexistent    → サブコマンド一覧を表示（fallback しない）
+```
+
+`--help` 時はサブコマンド一覧 + デフォルトコマンドの Options を統合表示する。
+
+```
+$ my-app --help
+
+サーバーを起動する
+
+Usage: my-app [options]
+       my-app <command>
+
+Options:
+  -p, --port <port>  ポート番号 (env: MYAPP_SERVE_PORT, default: 3000)
+      --host <host>  ホスト名 (env: MYAPP_SERVE_HOST, default: localhost)
+  -v, --verbose      詳細ログ
+  -h, --help         ヘルプを表示する
+
+Available commands:
+  serve (default)
+  build
+  config
+```
+
+> [!NOTE]
+> `defaultCommand` は root レベル（`commands/` 直下）でのみ機能する。存在しないコマンド名を指定した場合は実行時にエラーになる。
+
 ## params と args の分離
 
 Web フレームワークの `req.params` と `req.query` の分離と同じ構造。

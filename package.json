@@ -9,8 +9,8 @@
     "test:all": "pnpm -r --include-workspace-root --if-present --no-bail --aggregate-output --reporter=append-only test",
     "typecheck:all": "pnpm -r --include-workspace-root --if-present --no-bail --aggregate-output --reporter=append-only typecheck",
     "lint:all": "pnpm -r --include-workspace-root --if-present --no-bail --aggregate-output --reporter=append-only lint",
-    "fix": "oxfmt '!apps/**' '!packages/**'",
-    "example": "bun run apps/example/src/index.ts",
+    "fix": "oxfmt '!examples/**' '!packages/**'",
+    "example": "bun run examples/full/src/index.ts",
     "fix:all": "pnpm -r --include-workspace-root --if-present --no-bail --aggregate-output --reporter=append-only fix",
     "release": "bumpp packages/fsss/package.json",
     "prepare": "lefthook install"

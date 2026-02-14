@@ -72,7 +72,63 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  apps/example:
+  examples/default-command:
+    dependencies:
+      '@miyaoka/fsss':
+        specifier: workspace:*
+        version: link:../../packages/fsss
+      zod:
+        specifier: 'catalog:'
+        version: 4.3.6
+    devDependencies:
+      '@tsconfig/node24':
+        specifier: 'catalog:'
+        version: 24.0.4
+      '@types/bun':
+        specifier: 'catalog:'
+        version: 1.3.9
+      oxfmt:
+        specifier: 'catalog:'
+        version: 0.31.0
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.46.0(oxlint-tsgolint@0.12.0)
+      oxlint-tsgolint:
+        specifier: 'catalog:'
+        version: 0.12.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  examples/full:
+    dependencies:
+      '@miyaoka/fsss':
+        specifier: workspace:*
+        version: link:../../packages/fsss
+      zod:
+        specifier: 'catalog:'
+        version: 4.3.6
+    devDependencies:
+      '@tsconfig/node24':
+        specifier: 'catalog:'
+        version: 24.0.4
+      '@types/bun':
+        specifier: 'catalog:'
+        version: 1.3.9
+      oxfmt:
+        specifier: 'catalog:'
+        version: 0.31.0
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.46.0(oxlint-tsgolint@0.12.0)
+      oxlint-tsgolint:
+        specifier: 'catalog:'
+        version: 0.12.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  examples/minimal:
     dependencies:
       '@miyaoka/fsss':
         specifier: workspace:*

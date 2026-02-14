@@ -17,7 +17,7 @@ pre-commit:
     - name: oxlint-root
       glob: "*.ts"
       exclude:
-        - "apps/**"
+        - "examples/**"
         - "packages/**"
       run: pnpm exec oxlint --type-aware --fix {staged_files} && pnpm exec oxfmt {staged_files}
       stage_fixed: true
@@ -26,8 +26,18 @@ pre-commit:
       glob: "**/*.ts"
       run: pnpm exec oxlint --type-aware --fix {staged_files} && pnpm exec oxfmt {staged_files}
       stage_fixed: true
-    - name: oxlint-example
-      root: "apps/example/"
+    - name: oxlint-minimal
+      root: "examples/minimal/"
+      glob: "**/*.ts"
+      run: pnpm exec oxlint --type-aware --fix {staged_files} && pnpm exec oxfmt {staged_files}
+      stage_fixed: true
+    - name: oxlint-default-command
+      root: "examples/default-command/"
+      glob: "**/*.ts"
+      run: pnpm exec oxlint --type-aware --fix {staged_files} && pnpm exec oxfmt {staged_files}
+      stage_fixed: true
+    - name: oxlint-full
+      root: "examples/full/"
       glob: "**/*.ts"
       run: pnpm exec oxlint --type-aware --fix {staged_files} && pnpm exec oxfmt {staged_files}
       stage_fixed: true

@@ -1,0 +1,28 @@
+{
+  "name": "@fsss/full",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "fsss-full": "./src/index.ts"
+  },
+  "scripts": {
+    "prepare": "fsss-codegen --commandsDir src/commands --outDir src",
+    "cli": "bun run src/index.ts",
+    "typecheck": "tsgo --noEmit",
+    "lint": "oxlint --type-aware .",
+    "fix": "oxlint --type-aware --fix . && oxfmt ."
+  },
+  "dependencies": {
+    "@miyaoka/fsss": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@tsconfig/node24": "catalog:",
+    "@types/bun": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:",
+    "typescript": "catalog:"
+  }
+}

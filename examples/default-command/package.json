@@ -1,13 +1,12 @@
 {
-  "name": "@fsss/example",
+  "name": "@fsss/default-command",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "bin": {
-    "fsss-example": "./src/index.ts"
+    "fsss-default-command": "./src/index.ts"
   },
   "scripts": {
-    "prepare": "fsss-codegen --commandsDir src/commands --outDir src",
     "cli": "bun run src/index.ts",
     "typecheck": "tsgo --noEmit",
     "lint": "oxlint --type-aware .",
