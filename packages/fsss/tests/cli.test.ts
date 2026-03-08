@@ -3,6 +3,10 @@ import { resolve } from "node:path";
 
 const ENTRY = resolve(import.meta.dirname, "__fixtures__/cli-entry.ts");
 const DEFAULT_COMMAND_ENTRY = resolve(import.meta.dirname, "__fixtures__/default-command-entry.ts");
+const DEFAULT_COMMAND_POSITIONAL_ENTRY = resolve(
+  import.meta.dirname,
+  "__fixtures__/default-command-positional-entry.ts",
+);
 const CONFIG_PATH = resolve(import.meta.dirname, "__fixtures__/test-config.json");
 
 async function runCLI(
@@ -292,9 +296,10 @@ describe("defaultCommand", () => {
     expect(exitCode).toBe(0);
   });
 
-  test("存在しないコマンドでサブコマンド一覧を表示する", async () => {
+  test("未マッチのトークンはデフォルトコマンドにフォールバックする", async () => {
+    // serve には positional 引数がないため、未マッチトークンは無視されデフォルト値で実行される
     const { stdout, exitCode } = await runDefaultCLI("nonexistent");
-    expect(stdout).toContain("Available commands:");
+    expect(stdout).toBe("localhost:3000");
     expect(exitCode).toBe(0);
   });
 
@@ -321,6 +326,43 @@ describe("defaultCommand", () => {
     const { stdout, exitCode } = await runDefaultCLI("serve", "--help");
     expect(stdout).toContain("Usage: test-cli serve");
     expect(stdout).not.toContain("Available commands:");
+    expect(exitCode).toBe(0);
+  });
+});
+
+// --- defaultCommand（positional 引数付き） ---
+
+async function runDefaultPositionalCLI(
+  ...args: string[]
+): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+  const proc = Bun.spawn(["bun", "run", DEFAULT_COMMAND_POSITIONAL_ENTRY, ...args], {
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  const [stdout, stderr, exitCode] = await Promise.all([
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+    proc.exited,
+  ]);
+  return { stdout: stdout.trim(), stderr: stderr.trim(), exitCode };
+}
+
+describe("defaultCommand with positional args", () => {
+  test("未マッチのトークンをデフォルトコマンドの位置引数として渡す", async () => {
+    const { stdout, exitCode } = await runDefaultPositionalCLI("/tmp/foo");
+    expect(stdout).toBe("/tmp/foo");
+    expect(exitCode).toBe(0);
+  });
+
+  test("引数なしでデフォルトコマンドを実行する", async () => {
+    const { stdout, exitCode } = await runDefaultPositionalCLI();
+    expect(stdout).toBe(".");
+    expect(exitCode).toBe(0);
+  });
+
+  test("別コマンドの実行に影響しない", async () => {
+    const { stdout, exitCode } = await runDefaultPositionalCLI("config", "set", "foo", "bar");
+    expect(stdout).toBe("foo=bar");
     expect(exitCode).toBe(0);
   });
 });
