@@ -127,11 +127,8 @@ function createCLI(options: CLIOptions): CLI {
     // ルート未解決時の処理
     if (routeResult.kind === "unresolved") {
       const isRootLevel = resolve(routeResult.stoppedDir) === resolve(commandsDir);
-      // 先頭トークンがコマンド名候補（フラグでない文字列）の場合、
-      // 存在しないコマンド名なので defaultCommand に fallback しない
-      const hasUnmatchedCommand = tokens.length > 0 && !tokens[0].startsWith("-");
 
-      if (isRootLevel && defaultCommand !== undefined && !hasUnmatchedCommand) {
+      if (isRootLevel && defaultCommand !== undefined) {
         // --help / -h → サブコマンド一覧 + デフォルトコマンドの Options を統合表示
         if (tokens.includes("--help") || tokens.includes("-h")) {
           const defaultRouteResult = await resolveRoute(commandsDir, [defaultCommand]);
@@ -162,8 +159,7 @@ function createCLI(options: CLIOptions): CLI {
         }
         routeResult = retryResult;
       } else {
-        // defaultCommand なし or root 以外 or 未マッチのコマンド名あり
-        // → 従来通りサブコマンド一覧ヘルプを表示
+        // defaultCommand なし or root 以外 → サブコマンド一覧ヘルプを表示
         const commandPath = extractPartialCommandPath(commandsDir, routeResult.stoppedDir);
         const helpText = generateSubcommandHelp({
           programName,
