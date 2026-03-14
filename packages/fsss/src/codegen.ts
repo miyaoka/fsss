@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join, relative } from "node:path";
+import { join, relative } from "node:path";
 import { parseArgs } from "node:util";
 
 const PLUGINS_DIR_NAME = "_plugins";

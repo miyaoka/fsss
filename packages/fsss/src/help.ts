@@ -35,6 +35,20 @@ function resolveEnvNameForHelp(
   return undefined;
 }
 
+// ヘルプ表示用にデフォルト値を文字列化する
+// string/number/boolean はそのまま表示し、それ以外は JSON.stringify にフォールバック
+function formatDefaultValue(value: unknown): string {
+  switch (typeof value) {
+    case "string":
+    case "number":
+    case "boolean":
+    case "bigint":
+      return String(value);
+    default:
+      return JSON.stringify(value);
+  }
+}
+
 function formatOptionMeta(def: ArgDef, envName: string | undefined): string {
   const parts: string[] = [];
 
@@ -42,7 +56,7 @@ function formatOptionMeta(def: ArgDef, envName: string | undefined): string {
     parts.push(`env: ${envName}`);
   }
   if ("default" in def && def.default !== undefined) {
-    parts.push(`default: ${String(def.default)}`);
+    parts.push(`default: ${formatDefaultValue(def.default)}`);
   }
 
   if (parts.length === 0) {
