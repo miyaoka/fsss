@@ -2,9 +2,18 @@ import { readdir, stat } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
 const DYNAMIC_SEGMENT_PATTERN = /^\[(.+)]$/;
-const COMMAND_FILE_EXTENSION = ".ts";
+// .ts を先に並べることで、両方存在する場合は .ts が優先される
+const COMMAND_FILE_EXTENSIONS = [".ts", ".js"];
 const INDEX_FILE_NAME = "index";
 const INTERNAL_PREFIX = "_";
+
+function getCommandFileExtension(fileName: string): string | undefined {
+  return COMMAND_FILE_EXTENSIONS.find((ext) => fileName.endsWith(ext));
+}
+
+function stripCommandFileExtension(fileName: string, ext: string): string {
+  return fileName.slice(0, -ext.length);
+}
 
 interface RouteResolved {
   kind: "resolved";
@@ -40,8 +49,19 @@ async function fileExists(filePath: string): Promise<boolean> {
 // ディレクトリ内の利用可能なサブコマンド/サブディレクトリを列挙する
 async function listAvailableEntries(dir: string): Promise<AvailableEntry[]> {
   try {
-    const entries = await readdir(dir, { withFileTypes: true });
+    const rawEntries = await readdir(dir, { withFileTypes: true });
+    // 拡張子の優先順でソートし、readdir の返却順に依存しないようにする
+    const entries = rawEntries.toSorted((a, b) => {
+      const extA = a.isFile()
+        ? COMMAND_FILE_EXTENSIONS.indexOf(getCommandFileExtension(a.name) ?? "")
+        : -1;
+      const extB = b.isFile()
+        ? COMMAND_FILE_EXTENSIONS.indexOf(getCommandFileExtension(b.name) ?? "")
+        : -1;
+      return extA - extB;
+    });
     const result: AvailableEntry[] = [];
+    const seenNames = new Set<string>();
 
     for (const entry of entries) {
       // _ prefix はフレームワーク内部用（_plugins 等）なのでスキップ
@@ -49,12 +69,18 @@ async function listAvailableEntries(dir: string): Promise<AvailableEntry[]> {
         continue;
       }
 
-      if (entry.isFile() && entry.name.endsWith(COMMAND_FILE_EXTENSION)) {
-        const name = entry.name.slice(0, -COMMAND_FILE_EXTENSION.length);
+      const ext = entry.isFile() ? getCommandFileExtension(entry.name) : undefined;
+      if (ext !== undefined) {
+        const name = stripCommandFileExtension(entry.name, ext);
         // index はデフォルトコマンドなのでリストに表示しない
         if (name === INDEX_FILE_NAME) {
           continue;
         }
+        // ソート済みのため、同名で先に見つかった方が優先度が高い
+        if (seenNames.has(name)) {
+          continue;
+        }
+        seenNames.add(name);
         result.push({ name, isDynamic: false });
         continue;
       }
@@ -95,9 +121,11 @@ async function resolveRoute(commandsDir: string, tokens: string[]): Promise<Rout
 
     const entries = await readdir(currentDir, { withFileTypes: true });
 
-    // ファイルとして解決を試みる（token.ts があるか）
-    const fileName = token + COMMAND_FILE_EXTENSION;
-    const fileMatch = entries.find((e) => e.isFile() && e.name === fileName);
+    // ファイルとして解決を試みる（token.ts / token.js があるか）
+    const fileMatch = COMMAND_FILE_EXTENSIONS.reduce<import("node:fs").Dirent | undefined>(
+      (found, ext) => found ?? entries.find((e) => e.isFile() && e.name === token + ext),
+      undefined,
+    );
     if (fileMatch) {
       consumedCount = i + 1;
       return {
@@ -143,16 +171,18 @@ async function resolveRoute(commandsDir: string, tokens: string[]): Promise<Rout
     break;
   }
 
-  // ループ終了後、currentDir に index.ts があるか確認
-  const indexPath = join(currentDir, INDEX_FILE_NAME + COMMAND_FILE_EXTENSION);
-  if (await fileExists(indexPath)) {
-    return {
-      kind: "resolved",
-      filePath: indexPath,
-      params,
-      remainingTokens: tokens.slice(consumedCount),
-      traversedDirs,
-    };
+  // ループ終了後、currentDir に index.ts / index.js があるか確認
+  for (const ext of COMMAND_FILE_EXTENSIONS) {
+    const indexPath = join(currentDir, INDEX_FILE_NAME + ext);
+    if (await fileExists(indexPath)) {
+      return {
+        kind: "resolved",
+        filePath: indexPath,
+        params,
+        remainingTokens: tokens.slice(consumedCount),
+        traversedDirs,
+      };
+    }
   }
 
   // 未解決: 利用可能なサブコマンドを列挙して返す
