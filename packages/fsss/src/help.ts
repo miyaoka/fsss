@@ -266,31 +266,27 @@ function generateDefaultCommandHelp(config: DefaultCommandHelpConfig): string {
   lines.push(`       ${programName} <command>`);
   lines.push("");
 
-  // Options セクション（デフォルトコマンドの args から生成）
+  // Options セクション（デフォルトコマンドの args + built-in フラグ）
+  const optionLines: OptionLine[] = [];
   if (argsDefs !== undefined) {
     const entries = Object.entries(argsDefs);
     const optionEntries = entries.filter(([, def]) => def.positional !== true);
-
-    if (optionEntries.length > 0) {
-      lines.push("Options:");
-
-      const optionLines = optionEntries.map(([name, def]) =>
-        formatOptionLine(name, def, envPrefix, commandPath),
-      );
-      optionLines.push(formatHelpLine());
-      if (showVersion) {
-        optionLines.push(formatVersionLine(versionAlias));
-      }
-
-      const maxLeftWidth = Math.max(...optionLines.map((l) => l.left.length));
-
-      for (const line of optionLines) {
-        const padding = " ".repeat(maxLeftWidth - line.left.length + COLUMN_GAP);
-        lines.push(`${INDENT}${line.left}${padding}${line.right}`);
-      }
-      lines.push("");
-    }
+    optionLines.push(
+      ...optionEntries.map(([name, def]) => formatOptionLine(name, def, envPrefix, commandPath)),
+    );
   }
+  optionLines.push(formatHelpLine());
+  if (showVersion) {
+    optionLines.push(formatVersionLine(versionAlias));
+  }
+
+  lines.push("Options:");
+  const maxLeftWidth = Math.max(...optionLines.map((l) => l.left.length));
+  for (const line of optionLines) {
+    const padding = " ".repeat(maxLeftWidth - line.left.length + COLUMN_GAP);
+    lines.push(`${INDENT}${line.left}${padding}${line.right}`);
+  }
+  lines.push("");
 
   // Available commands セクション
   if (availableEntries.length > 0) {

@@ -94,22 +94,16 @@ function extractPartialCommandPath(commandsDir: string, stoppedDir: string): str
   return segments.filter((s) => !s.startsWith("["));
 }
 
-// argv からフレームワークフラグ（--config / -c / --version）を抽出する
+// argv からフレームワークフラグ（--config / -c）を抽出する
 // サブコマンドの前に配置されるグローバルフラグを処理する
 // 残りのトークンは router に渡される
-interface FrameworkFlagsConfig {
-  versionAlias: string | undefined;
-}
-
 interface FrameworkFlags {
   configPath: string | undefined;
-  showVersion: boolean;
   remainingTokens: string[];
 }
 
-function extractFrameworkFlags(tokens: string[], config: FrameworkFlagsConfig): FrameworkFlags {
+function extractFrameworkFlags(tokens: string[]): FrameworkFlags {
   let configPath: string | undefined;
-  let showVersion = false;
   const remaining: string[] = [];
 
   for (let i = 0; i < tokens.length; i++) {
@@ -132,19 +126,17 @@ function extractFrameworkFlags(tokens: string[], config: FrameworkFlagsConfig): 
       continue;
     }
 
-    // --version / -V（エイリアス）
-    if (
-      token === "--version" ||
-      (config.versionAlias !== undefined && token === `-${config.versionAlias}`)
-    ) {
-      showVersion = true;
-      continue;
-    }
-
     remaining.push(token);
   }
 
-  return { configPath, showVersion, remainingTokens: remaining };
+  return { configPath, remainingTokens: remaining };
+}
+
+// トークン列に --version またはエイリアスが含まれるかチェックする
+function hasVersionFlag(tokens: string[], alias: string | undefined): boolean {
+  return tokens.some(
+    (token) => token === "--version" || (alias !== undefined && token === `-${alias}`),
+  );
 }
 
 function createCLI(options: CLIOptions): CLI {
@@ -159,19 +151,7 @@ function createCLI(options: CLIOptions): CLI {
     const rawTokens = process.argv.slice(ARGV_SKIP);
 
     // フレームワークフラグの抽出（--config / -c / --version）
-    const {
-      configPath,
-      showVersion,
-      remainingTokens: tokens,
-    } = extractFrameworkFlags(rawTokens, {
-      versionAlias: resolvedVersion?.alias,
-    });
-
-    // --version チェック（version 指定時のみ有効）
-    if (showVersion && resolvedVersion !== undefined) {
-      console.log(resolvedVersion.number);
-      return;
-    }
+    const { configPath, remainingTokens: tokens } = extractFrameworkFlags(rawTokens);
 
     // ルーティング
     let routeResult = await resolveRoute(commandsDir, tokens);
@@ -179,6 +159,16 @@ function createCLI(options: CLIOptions): CLI {
     // ルート未解決時の処理
     if (routeResult.kind === "unresolved") {
       const isRootLevel = resolve(routeResult.stoppedDir) === resolve(commandsDir);
+
+      // --version チェック（ルートレベルのみ）
+      if (
+        isRootLevel &&
+        resolvedVersion !== undefined &&
+        hasVersionFlag(tokens, resolvedVersion.alias)
+      ) {
+        console.log(resolvedVersion.number);
+        return;
+      }
 
       if (isRootLevel && defaultCommand !== undefined) {
         // --help / -h → サブコマンド一覧 + デフォルトコマンドの Options を統合表示

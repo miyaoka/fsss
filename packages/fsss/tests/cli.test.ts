@@ -16,6 +16,14 @@ const VERSION_CUSTOM_ALIAS_ENTRY = resolve(
   import.meta.dirname,
   "__fixtures__/version-custom-alias-entry.ts",
 );
+const VERSION_DEFAULT_COMMAND_ENTRY = resolve(
+  import.meta.dirname,
+  "__fixtures__/version-default-command-entry.ts",
+);
+const VERSION_DEFAULT_COMMAND_POSITIONAL_ENTRY = resolve(
+  import.meta.dirname,
+  "__fixtures__/version-default-command-positional-entry.ts",
+);
 const CONFIG_PATH = resolve(import.meta.dirname, "__fixtures__/test-config.json");
 
 async function runCLI(
@@ -467,5 +475,55 @@ describe("version with custom alias", () => {
   test("--help に -v, --version が表示される", async () => {
     const { stdout } = await runVersionCLI(VERSION_CUSTOM_ALIAS_ENTRY, "serve", "--help");
     expect(stdout).toContain("-v, --version");
+  });
+});
+
+// --- version のスコープ（ルートレベルのみ有効） ---
+
+describe("version scope", () => {
+  test("サブコマンド後の --version はバージョンを表示しない", async () => {
+    const { stdout, exitCode } = await runVersionCLI(VERSION_ENTRY, "serve", "--version");
+    expect(stdout).not.toBe("1.2.3");
+    expect(exitCode).not.toBe(0);
+  });
+
+  test("サブコマンド後の -V はバージョンを表示しない", async () => {
+    const { stdout, exitCode } = await runVersionCLI(VERSION_ENTRY, "serve", "-V");
+    expect(stdout).not.toBe("1.2.3");
+    expect(exitCode).not.toBe(0);
+  });
+});
+
+// --- version + defaultCommand ---
+
+describe("version with defaultCommand", () => {
+  test("--version でバージョンを表示する", async () => {
+    const { stdout, exitCode } = await runVersionCLI(VERSION_DEFAULT_COMMAND_ENTRY, "--version");
+    expect(stdout).toBe("1.2.3");
+    expect(exitCode).toBe(0);
+  });
+
+  test("--help に --version が表示される", async () => {
+    const { stdout } = await runVersionCLI(VERSION_DEFAULT_COMMAND_ENTRY, "--help");
+    expect(stdout).toContain("-V, --version");
+  });
+});
+
+// --- version + defaultCommand（positional-only） ---
+
+describe("version with defaultCommand (positional-only)", () => {
+  test("--version でバージョンを表示する", async () => {
+    const { stdout, exitCode } = await runVersionCLI(
+      VERSION_DEFAULT_COMMAND_POSITIONAL_ENTRY,
+      "--version",
+    );
+    expect(stdout).toBe("1.2.3");
+    expect(exitCode).toBe(0);
+  });
+
+  test("--help に --help と --version が表示される", async () => {
+    const { stdout } = await runVersionCLI(VERSION_DEFAULT_COMMAND_POSITIONAL_ENTRY, "--help");
+    expect(stdout).toContain("--help");
+    expect(stdout).toContain("--version");
   });
 });
