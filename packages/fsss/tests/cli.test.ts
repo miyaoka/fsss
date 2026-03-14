@@ -186,11 +186,11 @@ describe("config", () => {
     expect(exitCode).toBe(0);
   });
 
-  test("config set で引数なしの場合はヘルプを表示する", async () => {
-    const { stdout, exitCode } = await runCLI("config", "set");
-    expect(stdout).toContain("Usage:");
-    expect(stdout).toContain("<key>");
-    expect(exitCode).toBe(0);
+  test("config set で引数不足時にエラーヘルプを表示する", async () => {
+    const { stderr, exitCode } = await runCLI("config", "set");
+    expect(stderr).toContain("Error:");
+    expect(stderr).toContain("Usage:");
+    expect(exitCode).toBe(1);
   });
 
   test("config 単体でサブコマンド一覧を表示する", async () => {
@@ -236,11 +236,11 @@ describe("remote", () => {
     expect(exitCode).toBe(0);
   });
 
-  test("remote <name> push で引数なしの場合はヘルプを表示する", async () => {
-    const { stdout, exitCode } = await runCLI("remote", "origin", "push");
-    expect(stdout).toContain("Usage:");
-    expect(stdout).toContain("<branch>");
-    expect(exitCode).toBe(0);
+  test("remote <name> push で引数不足時にエラーヘルプを表示する", async () => {
+    const { stderr, exitCode } = await runCLI("remote", "origin", "push");
+    expect(stderr).toContain("Error:");
+    expect(stderr).toContain("branch");
+    expect(exitCode).toBe(1);
   });
 });
 

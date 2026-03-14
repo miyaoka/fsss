@@ -263,10 +263,8 @@ function createCLI(options: CLIOptions): CLI {
       args = validateArgs(argsDefs, rawValues);
     } catch (error) {
       if (error instanceof ZodError) {
-        // 引数が一切渡されていない かつ エラーが全て型の不一致（値の欠落） → ヘルプを表示して正常終了
-        const hasNoInput = routeResult.remainingTokens.length === 0;
-        const isAllMissing = error.issues.every((issue) => issue.code === "invalid_type");
-        if (hasNoInput && isAllMissing) {
+        // ユーザーが何も入力していない（ルートの index.ts にフォールバック） → ヘルプを表示して正常終了
+        if (tokens.length === 0) {
           console.log(helpText);
           return;
         }
