@@ -504,6 +504,18 @@ describe("version scope", () => {
     expect(stdout).not.toBe("1.2.3");
     expect(stdout).toContain("Available commands:");
   });
+
+  test("--help と --version の同時指定では --version が優先される", async () => {
+    const { stdout, exitCode } = await runVersionCLI(VERSION_ENTRY, "--help", "--version");
+    expect(stdout).toBe("1.2.3");
+    expect(exitCode).toBe(0);
+  });
+
+  test("--version と --help の同時指定でも --version が優先される", async () => {
+    const { stdout, exitCode } = await runVersionCLI(VERSION_ENTRY, "--version", "--help");
+    expect(stdout).toBe("1.2.3");
+    expect(exitCode).toBe(0);
+  });
 });
 
 // --- version + defaultCommand ---
