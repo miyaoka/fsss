@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
 
 const ENTRY = resolve(import.meta.dirname, "__fixtures__/cli-entry.ts");
+const ROOT_INDEX_ENTRY = resolve(import.meta.dirname, "__fixtures__/root-index-entry.ts");
 const DEFAULT_COMMAND_ENTRY = resolve(import.meta.dirname, "__fixtures__/default-command-entry.ts");
 const DEFAULT_COMMAND_POSITIONAL_ENTRY = resolve(
   import.meta.dirname,
@@ -185,11 +186,11 @@ describe("config", () => {
     expect(exitCode).toBe(0);
   });
 
-  test("config set で引数不足時にエラーヘルプを表示する", async () => {
-    const { stderr, exitCode } = await runCLI("config", "set");
-    expect(stderr).toContain("Error:");
-    expect(stderr).toContain("Usage:");
-    expect(exitCode).toBe(1);
+  test("config set で引数なしの場合はヘルプを表示する", async () => {
+    const { stdout, exitCode } = await runCLI("config", "set");
+    expect(stdout).toContain("Usage:");
+    expect(stdout).toContain("<key>");
+    expect(exitCode).toBe(0);
   });
 
   test("config 単体でサブコマンド一覧を表示する", async () => {
@@ -235,11 +236,11 @@ describe("remote", () => {
     expect(exitCode).toBe(0);
   });
 
-  test("remote <name> push で引数不足時にエラーヘルプを表示する", async () => {
-    const { stderr, exitCode } = await runCLI("remote", "origin", "push");
-    expect(stderr).toContain("Error:");
-    expect(stderr).toContain("branch");
-    expect(exitCode).toBe(1);
+  test("remote <name> push で引数なしの場合はヘルプを表示する", async () => {
+    const { stdout, exitCode } = await runCLI("remote", "origin", "push");
+    expect(stdout).toContain("Usage:");
+    expect(stdout).toContain("<branch>");
+    expect(exitCode).toBe(0);
   });
 });
 
@@ -549,5 +550,45 @@ describe("version with defaultCommand (positional-only)", () => {
     const { stdout } = await runVersionCLI(VERSION_DEFAULT_COMMAND_POSITIONAL_ENTRY, "--help");
     expect(stdout).toContain("--help");
     expect(stdout).toContain("--version");
+  });
+});
+
+// --- 引数なし実行時のヘルプ自動表示 ---
+
+async function runRootIndexCLI(
+  ...args: string[]
+): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+  const proc = Bun.spawn(["bun", "run", ROOT_INDEX_ENTRY, ...args], {
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  const [stdout, stderr, exitCode] = await Promise.all([
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+    proc.exited,
+  ]);
+  return { stdout: stdout.trim(), stderr: stderr.trim(), exitCode };
+}
+
+describe("auto help on no args", () => {
+  test("引数なしでヘルプを表示して正常終了する", async () => {
+    const { stdout, stderr, exitCode } = await runRootIndexCLI();
+    expect(stdout).toContain("Say hello");
+    expect(stdout).toContain("Usage:");
+    expect(stdout).toContain("<name>");
+    expect(stderr).toBe("");
+    expect(exitCode).toBe(0);
+  });
+
+  test("引数ありで正常に実行する", async () => {
+    const { stdout, exitCode } = await runRootIndexCLI("world");
+    expect(stdout).toBe("Hello, world");
+    expect(exitCode).toBe(0);
+  });
+
+  test("-h でヘルプを表示する", async () => {
+    const { stdout, exitCode } = await runRootIndexCLI("-h");
+    expect(stdout).toContain("Usage:");
+    expect(exitCode).toBe(0);
   });
 });
