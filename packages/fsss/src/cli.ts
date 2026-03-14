@@ -160,9 +160,11 @@ function createCLI(options: CLIOptions): CLI {
     if (routeResult.kind === "unresolved") {
       const isRootLevel = resolve(routeResult.stoppedDir) === resolve(commandsDir);
 
-      // --version チェック（ルートレベルのみ）
+      // --version チェック（ルートレベル かつ サブコマンド候補がない場合のみ）
+      const hasSubcommandCandidate = tokens.some((t) => !t.startsWith("-"));
       if (
         isRootLevel &&
+        !hasSubcommandCandidate &&
         resolvedVersion !== undefined &&
         hasVersionFlag(tokens, resolvedVersion.alias)
       ) {

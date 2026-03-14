@@ -492,6 +492,18 @@ describe("version scope", () => {
     expect(stdout).not.toBe("1.2.3");
     expect(exitCode).not.toBe(0);
   });
+
+  test("存在しないコマンド + --version はバージョンを表示しない", async () => {
+    const { stdout } = await runVersionCLI(VERSION_ENTRY, "nonexistent", "--version");
+    expect(stdout).not.toBe("1.2.3");
+    expect(stdout).toContain("Available commands:");
+  });
+
+  test("存在しないコマンド + -V はバージョンを表示しない", async () => {
+    const { stdout } = await runVersionCLI(VERSION_ENTRY, "nonexistent", "-V");
+    expect(stdout).not.toBe("1.2.3");
+    expect(stdout).toContain("Available commands:");
+  });
 });
 
 // --- version + defaultCommand ---
