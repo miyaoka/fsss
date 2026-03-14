@@ -49,8 +49,19 @@ async function fileExists(filePath: string): Promise<boolean> {
 // ディレクトリ内の利用可能なサブコマンド/サブディレクトリを列挙する
 async function listAvailableEntries(dir: string): Promise<AvailableEntry[]> {
   try {
-    const entries = await readdir(dir, { withFileTypes: true });
+    const rawEntries = await readdir(dir, { withFileTypes: true });
+    // 拡張子の優先順でソートし、readdir の返却順に依存しないようにする
+    const entries = rawEntries.toSorted((a, b) => {
+      const extA = a.isFile()
+        ? COMMAND_FILE_EXTENSIONS.indexOf(getCommandFileExtension(a.name) ?? "")
+        : -1;
+      const extB = b.isFile()
+        ? COMMAND_FILE_EXTENSIONS.indexOf(getCommandFileExtension(b.name) ?? "")
+        : -1;
+      return extA - extB;
+    });
     const result: AvailableEntry[] = [];
+    const seenNames = new Set<string>();
 
     for (const entry of entries) {
       // _ prefix はフレームワーク内部用（_plugins 等）なのでスキップ
@@ -65,10 +76,11 @@ async function listAvailableEntries(dir: string): Promise<AvailableEntry[]> {
         if (name === INDEX_FILE_NAME) {
           continue;
         }
-        // 同名の .ts が既に登録済みなら .js は無視する
-        if (result.some((r) => r.name === name)) {
+        // ソート済みのため、同名で先に見つかった方が優先度が高い
+        if (seenNames.has(name)) {
           continue;
         }
+        seenNames.add(name);
         result.push({ name, isDynamic: false });
         continue;
       }
