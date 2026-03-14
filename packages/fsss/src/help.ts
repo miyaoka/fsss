@@ -9,6 +9,8 @@ interface HelpConfig {
   description?: string;
   argsDefs?: ArgsDefs;
   envPrefix?: string;
+  showVersion: boolean;
+  versionAlias?: string;
 }
 
 const INDENT = "  ";
@@ -89,8 +91,17 @@ function formatHelpLine(): OptionLine {
   };
 }
 
+function formatVersionLine(alias: string | undefined): OptionLine {
+  const aliasPrefix = alias !== undefined ? `-${alias}, ` : "    ";
+  return {
+    left: `${aliasPrefix}--version`,
+    right: "バージョンを表示する",
+  };
+}
+
 function generateHelp(config: HelpConfig): string {
-  const { programName, commandPath, description, argsDefs, envPrefix } = config;
+  const { programName, commandPath, description, argsDefs, envPrefix, showVersion, versionAlias } =
+    config;
   const lines: string[] = [];
 
   if (description !== undefined) {
@@ -120,6 +131,15 @@ function generateHelp(config: HelpConfig): string {
   lines.push("");
 
   if (argsDefs === undefined) {
+    if (showVersion) {
+      lines.push("Options:");
+      const builtinLines = [formatHelpLine(), formatVersionLine(versionAlias)];
+      const maxLeftWidth = Math.max(...builtinLines.map((l) => l.left.length));
+      for (const line of builtinLines) {
+        const padding = " ".repeat(maxLeftWidth - line.left.length + COLUMN_GAP);
+        lines.push(`${INDENT}${line.left}${padding}${line.right}`);
+      }
+    }
     return lines.join("\n");
   }
 
@@ -130,8 +150,15 @@ function generateHelp(config: HelpConfig): string {
   if (optionEntries.length === 0) {
     // フラグがなくても --help は表示
     lines.push("Options:");
-    const helpLine = formatHelpLine();
-    lines.push(`${INDENT}${helpLine.left}  ${helpLine.right}`);
+    const builtinLines = [formatHelpLine()];
+    if (showVersion) {
+      builtinLines.push(formatVersionLine(versionAlias));
+    }
+    const maxLeftWidth = Math.max(...builtinLines.map((l) => l.left.length));
+    for (const line of builtinLines) {
+      const padding = " ".repeat(maxLeftWidth - line.left.length + COLUMN_GAP);
+      lines.push(`${INDENT}${line.left}${padding}${line.right}`);
+    }
     return lines.join("\n");
   }
 
@@ -141,6 +168,9 @@ function generateHelp(config: HelpConfig): string {
     formatOptionLine(name, def, envPrefix, commandPath),
   );
   optionLines.push(formatHelpLine());
+  if (showVersion) {
+    optionLines.push(formatVersionLine(versionAlias));
+  }
 
   // 左揃えのための最大幅を計算
   const maxLeftWidth = Math.max(...optionLines.map((l) => l.left.length));
@@ -201,6 +231,8 @@ interface DefaultCommandHelpConfig {
   description?: string;
   argsDefs?: ArgsDefs;
   envPrefix?: string;
+  showVersion: boolean;
+  versionAlias?: string;
   availableEntries: AvailableEntry[];
 }
 
@@ -212,6 +244,8 @@ function generateDefaultCommandHelp(config: DefaultCommandHelpConfig): string {
     description,
     argsDefs,
     envPrefix,
+    showVersion,
+    versionAlias,
     availableEntries,
   } = config;
   const lines: string[] = [];
@@ -232,28 +266,27 @@ function generateDefaultCommandHelp(config: DefaultCommandHelpConfig): string {
   lines.push(`       ${programName} <command>`);
   lines.push("");
 
-  // Options セクション（デフォルトコマンドの args から生成）
+  // Options セクション（デフォルトコマンドの args + built-in フラグ）
+  const optionLines: OptionLine[] = [];
   if (argsDefs !== undefined) {
     const entries = Object.entries(argsDefs);
     const optionEntries = entries.filter(([, def]) => def.positional !== true);
-
-    if (optionEntries.length > 0) {
-      lines.push("Options:");
-
-      const optionLines = optionEntries.map(([name, def]) =>
-        formatOptionLine(name, def, envPrefix, commandPath),
-      );
-      optionLines.push(formatHelpLine());
-
-      const maxLeftWidth = Math.max(...optionLines.map((l) => l.left.length));
-
-      for (const line of optionLines) {
-        const padding = " ".repeat(maxLeftWidth - line.left.length + COLUMN_GAP);
-        lines.push(`${INDENT}${line.left}${padding}${line.right}`);
-      }
-      lines.push("");
-    }
+    optionLines.push(
+      ...optionEntries.map(([name, def]) => formatOptionLine(name, def, envPrefix, commandPath)),
+    );
   }
+  optionLines.push(formatHelpLine());
+  if (showVersion) {
+    optionLines.push(formatVersionLine(versionAlias));
+  }
+
+  lines.push("Options:");
+  const maxLeftWidth = Math.max(...optionLines.map((l) => l.left.length));
+  for (const line of optionLines) {
+    const padding = " ".repeat(maxLeftWidth - line.left.length + COLUMN_GAP);
+    lines.push(`${INDENT}${line.left}${padding}${line.right}`);
+  }
+  lines.push("");
 
   // Available commands セクション
   if (availableEntries.length > 0) {

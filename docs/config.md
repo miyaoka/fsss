@@ -64,16 +64,25 @@ config ファイルの JSON 構造はコマンドツリーと一致する。こ�
 
 複数のファイルが存在する場合、低い優先順位から順に deep merge される。ネストオブジェクトは再帰マージ、プリミティブは後勝ち。
 
-## `--config` フラグ
+## フレームワークフラグ
 
-Docker / Git / Cargo と同じパターンで、グローバルフラグをサブコマンドの**前**に配置する。
+### `--config` / `-c`
+
+Docker / Git / Cargo と同じパターンで、サブコマンドの**前**に配置する。ルーティング前に消費されるため、コマンド側のフラグ定義と衝突しない。
 
 ```
 my-app --config path.json serve --port 8080
 my-app -c path.json serve --port 8080
 ```
 
-フレームワークフラグはルーティング前に消費されるため、コマンド側のフラグ定義と衝突しない。
+### `--version` / `-V`
+
+`version` オプション指定時に有効。サブコマンドなしで実行した場合のみバージョン文字列を表示して終了する。
+
+```
+my-app --version
+my-app -V
+```
 
 ## createCLI オプション
 
@@ -85,11 +94,15 @@ const cli = createCLI({
   commandsDir: join(import.meta.dirname, "commands"),
   // 自動 env マッピング。指定すると prefix 付きで自動導出される
   autoEnv: { prefix: "MYAPP" },
+  // バージョン表示。string または { number, alias? } で指定
+  version: "1.0.0",
 });
 ```
 
-| フィールド    | 必須 | 説明                                                           |
-| ------------- | ---- | -------------------------------------------------------------- |
-| `name`        | ✓    | CLI 名。ヘルプの Usage 行と config ファイル名に使われる        |
-| `commandsDir` |      | コマンドファイルのディレクトリパス（デフォルト: `"commands"`） |
-| `autoEnv`     |      | `{ prefix: string }` を指定すると自動 env マッピングが有効     |
+| フィールド       | 必須 | 説明                                                                                                                                                  |
+| ---------------- | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`           | ✓    | CLI 名。ヘルプの Usage 行と config ファイル名に使われる                                                                                               |
+| `commandsDir`    |      | コマンドファイルのディレクトリパス（デフォルト: `"commands"`）                                                                                        |
+| `autoEnv`        |      | `{ prefix: string }` を指定すると自動 env マッピングが有効                                                                                            |
+| `defaultCommand` |      | 引数なし・フラグのみの実行時にフォールバックするコマンド名                                                                                            |
+| `version`        |      | `string \| { number: string; alias?: string \| false }`。指定すると `--version` / `-V` が有効。`alias` でショートエイリアスを変更（`false` で無効化） |

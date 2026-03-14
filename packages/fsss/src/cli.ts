@@ -20,11 +20,17 @@ interface AutoEnvConfig {
   prefix: string;
 }
 
+interface VersionConfig {
+  number: string;
+  alias?: string | false;
+}
+
 interface CLIOptions {
   name: string;
   commandsDir?: string;
   autoEnv?: AutoEnvConfig;
   defaultCommand?: string;
+  version?: string | VersionConfig;
 }
 
 interface CLI {
@@ -34,6 +40,23 @@ interface CLI {
 const DEFAULT_COMMANDS_DIR = "commands";
 const ARGV_SKIP = 2;
 const EXIT_CODE_ERROR = 1;
+const DEFAULT_VERSION_ALIAS = "V";
+
+// version オプションからバージョン文字列とエイリアスを解決する
+interface ResolvedVersion {
+  number: string;
+  alias: string | undefined;
+}
+
+function resolveVersion(version: string | VersionConfig): ResolvedVersion {
+  if (typeof version === "string") {
+    return { number: version, alias: DEFAULT_VERSION_ALIAS };
+  }
+  return {
+    number: version.number,
+    alias: version.alias === false ? undefined : (version.alias ?? DEFAULT_VERSION_ALIAS),
+  };
+}
 
 // arg 定義からパーサー設定を構築する
 function buildParserConfig(argsDefs: ArgsDefs): ParserConfig {
@@ -109,16 +132,25 @@ function extractFrameworkFlags(tokens: string[]): FrameworkFlags {
   return { configPath, remainingTokens: remaining };
 }
 
+// トークン列に --version またはエイリアスが含まれるかチェックする
+function hasVersionFlag(tokens: string[], alias: string | undefined): boolean {
+  return tokens.some(
+    (token) => token === "--version" || (alias !== undefined && token === `-${alias}`),
+  );
+}
+
 function createCLI(options: CLIOptions): CLI {
   const commandsDir = options.commandsDir ?? DEFAULT_COMMANDS_DIR;
   const programName = options.name;
   const envPrefix = options.autoEnv?.prefix;
   const defaultCommand = options.defaultCommand;
+  const resolvedVersion =
+    options.version !== undefined ? resolveVersion(options.version) : undefined;
 
   async function run(): Promise<void> {
     const rawTokens = process.argv.slice(ARGV_SKIP);
 
-    // フレームワークフラグの抽出（--config / -c）
+    // フレームワークフラグの抽出（--config / -c / --version）
     const { configPath, remainingTokens: tokens } = extractFrameworkFlags(rawTokens);
 
     // ルーティング
@@ -127,6 +159,18 @@ function createCLI(options: CLIOptions): CLI {
     // ルート未解決時の処理
     if (routeResult.kind === "unresolved") {
       const isRootLevel = resolve(routeResult.stoppedDir) === resolve(commandsDir);
+
+      // --version チェック（ルートレベル かつ サブコマンド候補がない場合のみ）
+      const hasSubcommandCandidate = tokens.some((t) => !t.startsWith("-"));
+      if (
+        isRootLevel &&
+        !hasSubcommandCandidate &&
+        resolvedVersion !== undefined &&
+        hasVersionFlag(tokens, resolvedVersion.alias)
+      ) {
+        console.log(resolvedVersion.number);
+        return;
+      }
 
       if (isRootLevel && defaultCommand !== undefined) {
         // --help / -h → サブコマンド一覧 + デフォルトコマンドの Options を統合表示
@@ -146,6 +190,8 @@ function createCLI(options: CLIOptions): CLI {
             description: commandConfig.description,
             argsDefs: Object.keys(argsDefs).length > 0 ? argsDefs : undefined,
             envPrefix,
+            showVersion: resolvedVersion !== undefined,
+            versionAlias: resolvedVersion?.alias,
             availableEntries: routeResult.availableEntries,
           });
           console.log(helpText);
@@ -185,6 +231,8 @@ function createCLI(options: CLIOptions): CLI {
       description: commandConfig.description,
       argsDefs: Object.keys(argsDefs).length > 0 ? argsDefs : undefined,
       envPrefix,
+      showVersion: resolvedVersion !== undefined,
+      versionAlias: resolvedVersion?.alias,
     });
 
     // --help / -h チェック
@@ -256,4 +304,4 @@ function createCLI(options: CLIOptions): CLI {
 }
 
 export { createCLI };
-export type { CLI, CLIOptions };
+export type { CLI, CLIOptions, VersionConfig };
