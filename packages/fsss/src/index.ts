@@ -2,7 +2,7 @@
 export { createCLI } from "./cli";
 export { definePlugin } from "./plugin";
 export { defineCommand } from "./types";
-export type { CLI, CLIOptions } from "./cli";
+export type { CLI, CLIOptions, VersionConfig } from "./cli";
 export type {
   ArgDef,
   ArgDefBase,

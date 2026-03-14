@@ -20,11 +20,17 @@ interface AutoEnvConfig {
   prefix: string;
 }
 
+interface VersionConfig {
+  number: string;
+  alias?: string | false;
+}
+
 interface CLIOptions {
   name: string;
   commandsDir?: string;
   autoEnv?: AutoEnvConfig;
   defaultCommand?: string;
+  version?: string | VersionConfig;
 }
 
 interface CLI {
@@ -34,6 +40,23 @@ interface CLI {
 const DEFAULT_COMMANDS_DIR = "commands";
 const ARGV_SKIP = 2;
 const EXIT_CODE_ERROR = 1;
+const DEFAULT_VERSION_ALIAS = "V";
+
+// version オプションからバージョン文字列とエイリアスを解決する
+interface ResolvedVersion {
+  number: string;
+  alias: string | undefined;
+}
+
+function resolveVersion(version: string | VersionConfig): ResolvedVersion {
+  if (typeof version === "string") {
+    return { number: version, alias: DEFAULT_VERSION_ALIAS };
+  }
+  return {
+    number: version.number,
+    alias: version.alias === false ? undefined : (version.alias ?? DEFAULT_VERSION_ALIAS),
+  };
+}
 
 // arg 定義からパーサー設定を構築する
 function buildParserConfig(argsDefs: ArgsDefs): ParserConfig {
@@ -71,16 +94,22 @@ function extractPartialCommandPath(commandsDir: string, stoppedDir: string): str
   return segments.filter((s) => !s.startsWith("["));
 }
 
-// argv からフレームワークフラグ（--config / -c）を抽出する
+// argv からフレームワークフラグ（--config / -c / --version）を抽出する
 // サブコマンドの前に配置されるグローバルフラグを処理する
 // 残りのトークンは router に渡される
+interface FrameworkFlagsConfig {
+  versionAlias: string | undefined;
+}
+
 interface FrameworkFlags {
   configPath: string | undefined;
+  showVersion: boolean;
   remainingTokens: string[];
 }
 
-function extractFrameworkFlags(tokens: string[]): FrameworkFlags {
+function extractFrameworkFlags(tokens: string[], config: FrameworkFlagsConfig): FrameworkFlags {
   let configPath: string | undefined;
+  let showVersion = false;
   const remaining: string[] = [];
 
   for (let i = 0; i < tokens.length; i++) {
@@ -103,10 +132,19 @@ function extractFrameworkFlags(tokens: string[]): FrameworkFlags {
       continue;
     }
 
+    // --version / -V（エイリアス）
+    if (
+      token === "--version" ||
+      (config.versionAlias !== undefined && token === `-${config.versionAlias}`)
+    ) {
+      showVersion = true;
+      continue;
+    }
+
     remaining.push(token);
   }
 
-  return { configPath, remainingTokens: remaining };
+  return { configPath, showVersion, remainingTokens: remaining };
 }
 
 function createCLI(options: CLIOptions): CLI {
@@ -114,12 +152,26 @@ function createCLI(options: CLIOptions): CLI {
   const programName = options.name;
   const envPrefix = options.autoEnv?.prefix;
   const defaultCommand = options.defaultCommand;
+  const resolvedVersion =
+    options.version !== undefined ? resolveVersion(options.version) : undefined;
 
   async function run(): Promise<void> {
     const rawTokens = process.argv.slice(ARGV_SKIP);
 
-    // フレームワークフラグの抽出（--config / -c）
-    const { configPath, remainingTokens: tokens } = extractFrameworkFlags(rawTokens);
+    // フレームワークフラグの抽出（--config / -c / --version）
+    const {
+      configPath,
+      showVersion,
+      remainingTokens: tokens,
+    } = extractFrameworkFlags(rawTokens, {
+      versionAlias: resolvedVersion?.alias,
+    });
+
+    // --version チェック（version 指定時のみ有効）
+    if (showVersion && resolvedVersion !== undefined) {
+      console.log(resolvedVersion.number);
+      return;
+    }
 
     // ルーティング
     let routeResult = await resolveRoute(commandsDir, tokens);
@@ -146,6 +198,8 @@ function createCLI(options: CLIOptions): CLI {
             description: commandConfig.description,
             argsDefs: Object.keys(argsDefs).length > 0 ? argsDefs : undefined,
             envPrefix,
+            showVersion: resolvedVersion !== undefined,
+            versionAlias: resolvedVersion?.alias,
             availableEntries: routeResult.availableEntries,
           });
           console.log(helpText);
@@ -185,6 +239,8 @@ function createCLI(options: CLIOptions): CLI {
       description: commandConfig.description,
       argsDefs: Object.keys(argsDefs).length > 0 ? argsDefs : undefined,
       envPrefix,
+      showVersion: resolvedVersion !== undefined,
+      versionAlias: resolvedVersion?.alias,
     });
 
     // --help / -h チェック
@@ -256,4 +312,4 @@ function createCLI(options: CLIOptions): CLI {
 }
 
 export { createCLI };
-export type { CLI, CLIOptions };
+export type { CLI, CLIOptions, VersionConfig };
