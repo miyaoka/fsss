@@ -2,22 +2,22 @@ import { defineCommand } from "@miyaoka/fsss";
 import { z } from "zod";
 
 export default defineCommand({
-  description: "サーバーを起動する",
+  description: "Start the server",
   args: {
     port: {
       type: z.coerce.number().min(1).max(65535),
-      description: "ポート番号",
+      description: "Port number",
       alias: "p",
       default: 3000,
     },
     host: {
       type: z.string(),
-      description: "ホスト名",
+      description: "Hostname",
       default: "localhost",
     },
     verbose: {
       type: z.boolean(),
-      description: "詳細ログ",
+      description: "Verbose logging",
       alias: "v",
       default: false,
     },

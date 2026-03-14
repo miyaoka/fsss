@@ -138,7 +138,7 @@ describe("serve", () => {
 
   test("--help でヘルプを表示する（自動導出 env 名を含む）", async () => {
     const { stdout, exitCode } = await runCLI("serve", "--help");
-    expect(stdout).toContain("サーバーを起動する");
+    expect(stdout).toContain("Start the server");
     expect(stdout).toContain("Usage: test-cli serve");
     expect(stdout).toContain("--port");
     expect(stdout).toContain("--host");
@@ -322,7 +322,7 @@ describe("defaultCommand", () => {
 
   test("--help で統合ヘルプを表示する", async () => {
     const { stdout, exitCode } = await runDefaultCLI("--help");
-    expect(stdout).toContain("サーバーを起動する");
+    expect(stdout).toContain("Start the server");
     expect(stdout).toContain("--port");
     expect(stdout).toContain("--host");
     expect(stdout).toContain("Available commands:");
@@ -418,7 +418,7 @@ describe("version", () => {
   test("--help にバージョンフラグが表示される", async () => {
     const { stdout } = await runVersionCLI(VERSION_ENTRY, "serve", "--help");
     expect(stdout).toContain("-V, --version");
-    expect(stdout).toContain("バージョンを表示する");
+    expect(stdout).toContain("Show version");
   });
 
   test("version 未指定のエントリでは --version が無視される", async () => {

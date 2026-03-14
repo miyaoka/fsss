@@ -2,11 +2,11 @@ import { defineCommand } from "@miyaoka/fsss";
 import { z } from "zod";
 
 export default defineCommand({
-  description: "挨拶する",
+  description: "Say hello",
   args: {
     name: {
       type: z.string(),
-      description: "名前",
+      description: "Name",
       positional: true,
     },
   },

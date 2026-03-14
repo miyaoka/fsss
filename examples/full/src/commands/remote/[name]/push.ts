@@ -2,16 +2,16 @@ import { defineCommand } from "@miyaoka/fsss";
 import { z } from "zod";
 
 export default defineCommand({
-  description: "リモートにプッシュする",
+  description: "Push to remote",
   args: {
     branch: {
       type: z.string(),
-      description: "ブランチ名",
+      description: "Branch name",
       positional: true,
     },
     force: {
       type: z.boolean(),
-      description: "強制プッシュ",
+      description: "Force push",
       alias: "f",
       default: false,
     },

@@ -1,4 +1,4 @@
-// このファイルは自動生成されます。手動で編集しないでください。
+// This file is auto-generated. Do not edit manually.
 import type { LoggerExtensions } from "./commands/_plugins/logger";
 import type { AuthExtensions } from "./commands/remote/_plugins/auth";
 

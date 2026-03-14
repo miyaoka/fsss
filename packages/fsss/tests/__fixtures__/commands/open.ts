@@ -2,12 +2,12 @@ import { defineCommand } from "../../../src/index";
 import { z } from "zod";
 
 export default defineCommand({
-  description: "ファイルを開く",
+  description: "Open a file",
   args: {
     path: {
       type: z.string(),
       positional: true,
-      description: "対象パス",
+      description: "Target path",
       default: ".",
     },
   },
