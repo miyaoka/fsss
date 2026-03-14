@@ -87,7 +87,7 @@ function formatOptionLine(
 function formatHelpLine(): OptionLine {
   return {
     left: "-h, --help",
-    right: "ヘルプを表示する",
+    right: "Show help",
   };
 }
 
@@ -95,7 +95,7 @@ function formatVersionLine(alias: string | undefined): OptionLine {
   const aliasPrefix = alias !== undefined ? `-${alias}, ` : "    ";
   return {
     left: `${aliasPrefix}--version`,
-    right: "バージョンを表示する",
+    right: "Show version",
   };
 }
 

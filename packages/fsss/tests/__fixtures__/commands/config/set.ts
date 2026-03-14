@@ -2,16 +2,16 @@ import { defineCommand } from "../../../../src/index";
 import { z } from "zod";
 
 export default defineCommand({
-  description: "設定値をセットする",
+  description: "Set a config value",
   args: {
     key: {
       type: z.string(),
-      description: "設定キー",
+      description: "Config key",
       positional: true,
     },
     value: {
       type: z.string(),
-      description: "設定値",
+      description: "Config value",
       positional: true,
     },
   },

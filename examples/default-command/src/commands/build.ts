@@ -2,16 +2,16 @@ import { defineCommand } from "@miyaoka/fsss";
 import { z } from "zod";
 
 export default defineCommand({
-  description: "プロダクションビルドを実行する",
+  description: "Run production build",
   args: {
     outDir: {
       type: z.string(),
-      description: "出力先ディレクトリ",
+      description: "Output directory",
       default: "dist",
     },
     minify: {
       type: z.boolean(),
-      description: "ミニファイを有効にする",
+      description: "Enable minification",
       default: true,
     },
   },

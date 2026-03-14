@@ -76,7 +76,7 @@ async function generateExtensionsType(commandsDir: string, outDir: string): Prom
     typeInfos.push({ importPath, interfaceNames });
   }
 
-  const lines: string[] = ["// このファイルは自動生成されます。手動で編集しないでください。"];
+  const lines: string[] = ["// This file is auto-generated. Do not edit manually."];
 
   if (typeInfos.length === 0) {
     lines.push(
