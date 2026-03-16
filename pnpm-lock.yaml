@@ -182,21 +182,21 @@ importers:
         version: 5.9.3
       unplugin-dts:
         specifier: 'catalog:'
-        version: 1.0.0-beta.6(typescript@5.9.3)(vite@8.0.0(@types/node@25.3.5)(jiti@2.6.1)(yaml@2.8.2))
+        version: 1.0.0-beta.6(typescript@5.9.3)(vite@8.0.0(@types/node@25.5.0)(jiti@2.6.1)(yaml@2.8.2))
       vite:
         specifier: 'catalog:'
-        version: 8.0.0(@types/node@25.3.5)(jiti@2.6.1)(yaml@2.8.2)
+        version: 8.0.0(@types/node@25.5.0)(jiti@2.6.1)(yaml@2.8.2)
 
 packages:
 
-  '@emnapi/core@1.8.1':
-    resolution: {integrity: sha512-AvT9QFpxK0Zd8J0jopedNm+w/2fIzvtPKPjqyw9jwvBaReTTqPBk9Hixaz7KbjimP+QNz605/XnjFcDAL2pqBg==}
+  '@emnapi/core@1.9.0':
+    resolution: {integrity: sha512-0DQ98G9ZQZOxfUcQn1waV2yS8aWdZ6kJMbYCJB3oUBecjWYO1fqJ+a1DRfPF3O5JEkwqwP1A9QEN/9mYm2Yd0w==}
 
-  '@emnapi/runtime@1.8.1':
-    resolution: {integrity: sha512-mehfKSMWjjNol8659Z8KxEMrdSJDDot5SXMq00dM8BN4o+CLNXQ0xH2V7EchNHV4RmbZLmmPdEaXZc5H2FXmDg==}
+  '@emnapi/runtime@1.9.0':
+    resolution: {integrity: sha512-QN75eB0IH2ywSpRpNddCRfQIhmJYBCJ1x5Lb3IscKAL8bMnVAKnRg8dCoXbHzVLLH7P38N2Z3mtulB7W0J0FKw==}
 
-  '@emnapi/wasi-threads@1.1.0':
-    resolution: {integrity: sha512-WI0DdZ8xFSbgMjR1sFsKABJ/C5OnRrjT06JXbZKexJGrDuPTzZdDYfFlsgcCXCyf+suG5QU2e/y1Wo2V/OapLQ==}
+  '@emnapi/wasi-threads@1.2.0':
+    resolution: {integrity: sha512-N10dEJNSsUx41Z6pZsXU8FjPjpBEplgH24sfkmITrBED1/U2Esum9F3lfLrMjKHHjmi557zQn7kR9R+XWXu5Rg==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -620,8 +620,8 @@ packages:
   '@types/node@24.12.0':
     resolution: {integrity: sha512-GYDxsZi3ChgmckRT9HPU0WEhKLP08ev/Yfcq2AstjrDASOYCSXeyjDsHg4v5t4jOj7cyDX3vmprafKlWIG9MXQ==}
 
-  '@types/node@25.3.5':
-    resolution: {integrity: sha512-oX8xrhvpiyRCQkG1MFchB09f+cXftgIXb3a7UUa4Y3wpmZPw5tyZGTLWhlESOLq1Rq6oDlc8npVU2/9xiCuXMA==}
+  '@types/node@25.5.0':
+    resolution: {integrity: sha512-jp2P3tQMSxWugkCUKLRPVUpGaL5MVFwF8RDuSRztfwgN1wmqJeMSbKlnEtQqU8UrhTmzEmZdu2I6v2dpp7XIxw==}
 
   '@typescript/native-preview-darwin-arm64@7.0.0-dev.20260312.1':
     resolution: {integrity: sha512-AhPdPuVe4osxWoeImS21jVhc0VJ2QnzLUZtEFMakY0Rf70C0b6il/m7hwRf9wkr9xXZLVOVJ1kYrpvQRuHFE0Q==}
@@ -1138,18 +1138,18 @@ packages:
 
 snapshots:
 
-  '@emnapi/core@1.8.1':
+  '@emnapi/core@1.9.0':
     dependencies:
-      '@emnapi/wasi-threads': 1.1.0
+      '@emnapi/wasi-threads': 1.2.0
       tslib: 2.8.1
     optional: true
 
-  '@emnapi/runtime@1.8.1':
+  '@emnapi/runtime@1.9.0':
     dependencies:
       tslib: 2.8.1
     optional: true
 
-  '@emnapi/wasi-threads@1.1.0':
+  '@emnapi/wasi-threads@1.2.0':
     dependencies:
       tslib: 2.8.1
     optional: true
@@ -1175,8 +1175,8 @@ snapshots:
 
   '@napi-rs/wasm-runtime@1.1.1':
     dependencies:
-      '@emnapi/core': 1.8.1
-      '@emnapi/runtime': 1.8.1
+      '@emnapi/core': 1.9.0
+      '@emnapi/runtime': 1.9.0
       '@tybys/wasm-util': 0.10.1
     optional: true
 
@@ -1388,7 +1388,7 @@ snapshots:
     dependencies:
       undici-types: 7.16.0
 
-  '@types/node@25.3.5':
+  '@types/node@25.5.0':
     dependencies:
       undici-types: 7.18.2
 
@@ -1459,7 +1459,7 @@ snapshots:
 
   bun-types@1.3.10:
     dependencies:
-      '@types/node': 25.3.5
+      '@types/node': 25.5.0
 
   c12@3.3.3:
     dependencies:
@@ -1799,7 +1799,7 @@ snapshots:
 
   undici-types@7.18.2: {}
 
-  unplugin-dts@1.0.0-beta.6(typescript@5.9.3)(vite@8.0.0(@types/node@25.3.5)(jiti@2.6.1)(yaml@2.8.2)):
+  unplugin-dts@1.0.0-beta.6(typescript@5.9.3)(vite@8.0.0(@types/node@25.5.0)(jiti@2.6.1)(yaml@2.8.2)):
     dependencies:
       '@rollup/pluginutils': 5.3.0
       '@volar/typescript': 2.4.28
@@ -1811,7 +1811,7 @@ snapshots:
       typescript: 5.9.3
       unplugin: 2.3.11
     optionalDependencies:
-      vite: 8.0.0(@types/node@25.3.5)(jiti@2.6.1)(yaml@2.8.2)
+      vite: 8.0.0(@types/node@25.5.0)(jiti@2.6.1)(yaml@2.8.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -1822,7 +1822,7 @@ snapshots:
       picomatch: 4.0.3
       webpack-virtual-modules: 0.6.2
 
-  vite@8.0.0(@types/node@25.3.5)(jiti@2.6.1)(yaml@2.8.2):
+  vite@8.0.0(@types/node@25.5.0)(jiti@2.6.1)(yaml@2.8.2):
     dependencies:
       '@oxc-project/runtime': 0.115.0
       lightningcss: 1.32.0
@@ -1831,7 +1831,7 @@ snapshots:
       rolldown: 1.0.0-rc.9
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 25.3.5
+      '@types/node': 25.5.0
       fsevents: 2.3.3
       jiti: 2.6.1
       yaml: 2.8.2
