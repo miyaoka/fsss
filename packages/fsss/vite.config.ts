@@ -8,8 +8,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: {
-        index: resolve(__dirname, "src/index.ts"),
-        codegen: resolve(__dirname, "src/codegen.ts"),
+        index: resolve(import.meta.dirname, "src/index.ts"),
+        codegen: resolve(import.meta.dirname, "src/codegen.ts"),
       },
       formats: ["es"],
     },
