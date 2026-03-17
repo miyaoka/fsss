@@ -7,8 +7,8 @@ catalog:
   '@types/bun': 1.3.10
   '@types/node': 24.12.0
   '@typescript/native-preview': 7.0.0-dev.20260314.1
-  oxfmt: 0.37.0
-  oxlint: 1.52.0
+  oxfmt: 0.40.0
+  oxlint: 1.55.0
   oxlint-tsgolint: 0.16.0
   typescript: 5.9.3
   unplugin-dts: 1.0.0-beta.6
