@@ -8,7 +8,7 @@ catalog:
   '@types/node': 24.12.2
   '@typescript/native-preview': 7.0.0-dev.20260407.1
   oxfmt: 0.44.0
-  oxlint: 1.58.0
+  oxlint: 1.59.0
   oxlint-tsgolint: 0.20.0
   typescript: 6.0.2
   unplugin-dts: 1.0.0-beta.6
