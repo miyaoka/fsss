@@ -28,8 +28,8 @@ catalogs:
       specifier: 0.21.1
       version: 0.21.1
     typescript:
-      specifier: 6.0.2
-      version: 6.0.2
+      specifier: 6.0.3
+      version: 6.0.3
     unplugin-dts:
       specifier: 1.0.0-beta.6
       version: 1.0.0-beta.6
@@ -70,7 +70,7 @@ importers:
         version: 0.21.1
       typescript:
         specifier: 'catalog:'
-        version: 6.0.2
+        version: 6.0.3
 
   examples/default-command:
     dependencies:
@@ -98,7 +98,7 @@ importers:
         version: 0.21.1
       typescript:
         specifier: 'catalog:'
-        version: 6.0.2
+        version: 6.0.3
 
   examples/full:
     dependencies:
@@ -126,7 +126,7 @@ importers:
         version: 0.21.1
       typescript:
         specifier: 'catalog:'
-        version: 6.0.2
+        version: 6.0.3
 
   examples/minimal:
     dependencies:
@@ -154,7 +154,7 @@ importers:
         version: 0.21.1
       typescript:
         specifier: 'catalog:'
-        version: 6.0.2
+        version: 6.0.3
 
   packages/fsss:
     dependencies:
@@ -179,10 +179,10 @@ importers:
         version: 0.21.1
       typescript:
         specifier: 'catalog:'
-        version: 6.0.2
+        version: 6.0.3
       unplugin-dts:
         specifier: 'catalog:'
-        version: 1.0.0-beta.6(typescript@6.0.2)(vite@8.0.8(@types/node@25.6.0)(jiti@2.6.1)(yaml@2.8.3))
+        version: 1.0.0-beta.6(typescript@6.0.3)(vite@8.0.8(@types/node@25.6.0)(jiti@2.6.1)(yaml@2.8.3))
       vite:
         specifier: 'catalog:'
         version: 8.0.8(@types/node@25.6.0)(jiti@2.6.1)(yaml@2.8.3)
@@ -974,8 +974,8 @@ packages:
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
-  typescript@6.0.2:
-    resolution: {integrity: sha512-bGdAIrZ0wiGDo5l8c++HWtbaNCWTS4UTv7RaTH/ThVIgjkveJt83m74bBHMJkuCbslY8ixgLBVZJIOiQlQTjfQ==}
+  typescript@6.0.3:
+    resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -1679,7 +1679,7 @@ snapshots:
   tslib@2.8.1:
     optional: true
 
-  typescript@6.0.2: {}
+  typescript@6.0.3: {}
 
   ufo@1.6.3: {}
 
@@ -1700,7 +1700,7 @@ snapshots:
 
   undici-types@7.19.2: {}
 
-  unplugin-dts@1.0.0-beta.6(typescript@6.0.2)(vite@8.0.8(@types/node@25.6.0)(jiti@2.6.1)(yaml@2.8.3)):
+  unplugin-dts@1.0.0-beta.6(typescript@6.0.3)(vite@8.0.8(@types/node@25.6.0)(jiti@2.6.1)(yaml@2.8.3)):
     dependencies:
       '@rollup/pluginutils': 5.3.0
       '@volar/typescript': 2.4.28
@@ -1709,7 +1709,7 @@ snapshots:
       kolorist: 1.8.0
       local-pkg: 1.1.2
       magic-string: 0.30.21
-      typescript: 6.0.2
+      typescript: 6.0.3
       unplugin: 2.3.11
     optionalDependencies:
       vite: 8.0.8(@types/node@25.6.0)(jiti@2.6.1)(yaml@2.8.3)
