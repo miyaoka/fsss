@@ -2,3 +2,5 @@ changelog:
   exclude:
     labels:
       - dependencies
+    authors:
+      - renovate[bot]
