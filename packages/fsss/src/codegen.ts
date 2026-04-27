@@ -60,7 +60,7 @@ async function extractInterfaceNames(filePath: string): Promise<string[]> {
 }
 
 // .fsss/extensions.d.ts を生成する
-async function generateExtensionsType(commandsDir: string, outDir: string): Promise<void> {
+export async function generateExtensionsType(commandsDir: string, outDir: string): Promise<void> {
   const pluginFiles = await findAllPluginFiles(commandsDir);
 
   const typeInfos: PluginTypeInfo[] = [];
@@ -80,6 +80,8 @@ async function generateExtensionsType(commandsDir: string, outDir: string): Prom
 
   if (typeInfos.length === 0) {
     lines.push(
+      "",
+      "export {};",
       "",
       'declare module "@miyaoka/fsss" {',
       "  // eslint-disable-next-line @typescript-eslint/no-empty-object-type",
@@ -112,16 +114,18 @@ async function generateExtensionsType(commandsDir: string, outDir: string): Prom
 }
 
 // CLI として実行された場合
-const { values } = parseArgs({
-  options: {
-    commandsDir: { type: "string" },
-    outDir: { type: "string" },
-  },
-});
+if (import.meta.main) {
+  const { values } = parseArgs({
+    options: {
+      commandsDir: { type: "string" },
+      outDir: { type: "string" },
+    },
+  });
 
-if (values.commandsDir === undefined || values.outDir === undefined) {
-  console.error("Usage: bun run codegen.ts --commandsDir <path> --outDir <path>");
-  process.exit(1);
+  if (values.commandsDir === undefined || values.outDir === undefined) {
+    console.error("Usage: bun run codegen.ts --commandsDir <path> --outDir <path>");
+    process.exit(1);
+  }
+
+  await generateExtensionsType(values.commandsDir, values.outDir);
 }
-
-await generateExtensionsType(values.commandsDir, values.outDir);
