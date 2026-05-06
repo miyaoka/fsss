@@ -10,6 +10,14 @@
 >
 > _A CLI framework where your file structure becomes your command structure, and a single schema gives you typed values whether they come from flags, env vars, or config files._
 
+## Install
+
+`zod` を peer dependency として要求するため、本体と一緒にインストールする。
+
+```sh
+pnpm add @miyaoka/fsss zod
+```
+
 ## File Structure — ファイルを置くだけでコマンドが生える
 
 ```
