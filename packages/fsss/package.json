@@ -43,8 +43,8 @@
     "lint": "oxlint --type-aware .",
     "fix": "oxlint --type-aware --fix . && oxfmt ."
   },
-  "dependencies": {
-    "zod": "catalog:"
+  "peerDependencies": {
+    "zod": "^4.0.0"
   },
   "devDependencies": {
     "@tsconfig/node24": "catalog:",
@@ -54,6 +54,7 @@
     "oxlint-tsgolint": "catalog:",
     "typescript": "catalog:",
     "unplugin-dts": "catalog:",
-    "vite": "catalog:"
+    "vite": "catalog:",
+    "zod": "catalog:"
   }
 }
