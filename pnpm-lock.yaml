@@ -37,8 +37,8 @@ catalogs:
       specifier: 8.0.10
       version: 8.0.10
     zod:
-      specifier: 4.3.6
-      version: 4.3.6
+      specifier: 4.4.3
+      version: 4.4.3
 
 importers:
 
@@ -79,7 +79,7 @@ importers:
         version: link:../../packages/fsss
       zod:
         specifier: 'catalog:'
-        version: 4.3.6
+        version: 4.4.3
     devDependencies:
       '@tsconfig/node24':
         specifier: 'catalog:'
@@ -107,7 +107,7 @@ importers:
         version: link:../../packages/fsss
       zod:
         specifier: 'catalog:'
-        version: 4.3.6
+        version: 4.4.3
     devDependencies:
       '@tsconfig/node24':
         specifier: 'catalog:'
@@ -135,7 +135,7 @@ importers:
         version: link:../../packages/fsss
       zod:
         specifier: 'catalog:'
-        version: 4.3.6
+        version: 4.4.3
     devDependencies:
       '@tsconfig/node24':
         specifier: 'catalog:'
@@ -184,7 +184,7 @@ importers:
         version: 8.0.10(@types/node@25.6.0)(jiti@2.6.1)(yaml@2.8.3)
       zod:
         specifier: 'catalog:'
-        version: 4.3.6
+        version: 4.4.3
 
 packages:
 
@@ -1089,8 +1089,8 @@ packages:
     engines: {node: '>= 14.6'}
     hasBin: true
 
-  zod@4.3.6:
-    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+  zod@4.4.3:
+    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
 
 snapshots:
 
@@ -1749,4 +1749,4 @@ snapshots:
 
   yaml@2.8.3: {}
 
-  zod@4.3.6: {}
+  zod@4.4.3: {}
