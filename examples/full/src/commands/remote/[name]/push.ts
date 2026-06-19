@@ -1,16 +1,16 @@
 import { defineCommand } from "@miyaoka/fsss";
-import { z } from "zod";
+import { boolean, string } from "@tskm/core";
 
 export default defineCommand({
   description: "Push to remote",
   args: {
     branch: {
-      type: z.string(),
+      type: string(),
       description: "Branch name",
       positional: true,
     },
     force: {
-      type: z.boolean(),
+      type: boolean(),
       description: "Force push",
       alias: "f",
       default: false,

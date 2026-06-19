@@ -2,10 +2,10 @@
   "name": "@fsss/minimal",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "bin": {
     "fsss-minimal": "./src/index.ts"
   },
+  "type": "module",
   "scripts": {
     "cli": "bun run src/index.ts",
     "typecheck": "tsgo --noEmit",
@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@miyaoka/fsss": "workspace:*",
-    "zod": "catalog:"
+    "@tskm/core": "catalog:"
   },
   "devDependencies": {
     "@tsconfig/node24": "catalog:",

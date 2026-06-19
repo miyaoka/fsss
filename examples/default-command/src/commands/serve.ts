@@ -1,17 +1,17 @@
 import { defineCommand } from "@miyaoka/fsss";
-import { z } from "zod";
+import { maxValue, minValue, number, pipe, string } from "@tskm/core";
 
 export default defineCommand({
   description: "Start the dev server",
   args: {
     port: {
-      type: z.coerce.number().min(1).max(65535),
+      type: pipe(number(), minValue(1), maxValue(65535)),
       description: "Port number",
       alias: "p",
       default: 3000,
     },
     host: {
-      type: z.string(),
+      type: string(),
       description: "Hostname",
       default: "localhost",
     },

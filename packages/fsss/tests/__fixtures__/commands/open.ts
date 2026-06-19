@@ -1,11 +1,11 @@
 import { defineCommand } from "../../../src/index";
-import { z } from "zod";
+import { string } from "@tskm/core";
 
 export default defineCommand({
   description: "Open a file",
   args: {
     path: {
-      type: z.string(),
+      type: string(),
       positional: true,
       description: "Target path",
       default: ".",

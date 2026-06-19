@@ -2,10 +2,10 @@
   "name": "@fsss/full",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "bin": {
     "fsss-full": "./src/index.ts"
   },
+  "type": "module",
   "scripts": {
     "prepare": "fsss-codegen --commandsDir src/commands --outDir src",
     "cli": "bun run src/index.ts",
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@miyaoka/fsss": "workspace:*",
-    "zod": "catalog:"
+    "@tskm/core": "catalog:"
   },
   "devDependencies": {
     "@tsconfig/node24": "catalog:",

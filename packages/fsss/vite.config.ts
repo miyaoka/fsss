@@ -16,7 +16,7 @@ export default defineConfig({
     outDir: "dist",
     watch: isWatch ? { include: ["src/**/*"] } : null,
     rollupOptions: {
-      external: ["zod", /^node:/],
+      external: ["@tskm/core", /^node:/],
     },
   },
   plugins: [dts({ exclude: ["**/*.test.ts"] })],

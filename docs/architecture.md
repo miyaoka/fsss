@@ -108,7 +108,7 @@ Router から受け取った残りトークンを、フラグ（`--flag` / `-f`�
 
 ### boolean フラグの判定
 
-Parser はどのフラグが boolean かを知る必要がある。これは CLI モジュールが args 定義の Zod スキーマを `isBooleanSchema()` で判定し、`ParserConfig.booleanFlags` として Parser に渡す。
+Parser はどのフラグが boolean かを知る必要がある。これは CLI モジュールが args 定義の tskm スキーマを `isBooleanSchema()` で判定し、`ParserConfig.booleanFlags` として Parser に渡す。
 
 boolean フラグでないフラグは次のトークンを値として消費する。boolean フラグは消費しない。この区別がないと `--verbose --port 3000` で `--verbose` が `--port` を値として食べてしまう。
 
@@ -155,7 +155,7 @@ flowchart TD
   config{"設定ファイル<br/>にある?"}
   def{"default<br/>がある?"}
   found["値を採用"]
-  undef["undefined<br/>（Zod がエラーにする）"]
+  undef["undefined<br/>（tskm がエラーにする）"]
 
   flag -- "Yes" --> found
   flag -- "No" --> pos
@@ -174,41 +174,41 @@ flowchart TD
 
 ## Validator — 型変換・検証
 
-Resolver から受け取った生の値を、Zod スキーマで型変換・バリデーションする。
+Resolver から受け取った生の値を、tskm スキーマで型変換・バリデーションする。
 
 ### 責務
 
-- args 定義の `type` フィールドから `z.object()` を動的に構築する
-- 各スキーマを `z.preprocess()` でラップし、文字列→型変換を自動化する
-- `schema.parse()` で型変換とバリデーションを同時に行う
-- バリデーション失敗時は `ZodError` を throw する（CLI モジュールがキャッチしてヘルプを表示する）
+- args 定義の `type` フィールドから `object()` スキーマを動的に構築する
+- 各値を `coerceValue()` で文字列→型変換してから parse に渡す
+- `parse(object(shape), values)` で型変換済みの値をバリデーションする
+- バリデーション失敗時は `TskmError` を throw する（CLI モジュールが `isTskmError()` でキャッチしてヘルプを表示する）
 
-### なぜ z.preprocess() が必要か
+### なぜフレームワーク側で型変換するか
 
-CLI フラグと環境変数は**常に文字列**で入ってくる。しかし Zod のスキーマは型に厳格で、`z.boolean()` は文字列 `"true"` を受け付けない。`z.number()` も文字列 `"3000"` を受け付けない。
+CLI フラグと環境変数は**常に文字列**で入ってくる。しかし tskm のスキーマは型に厳格で、`boolean()` は文字列 `"true"` を受け付けない。`number()` も文字列 `"3000"` を受け付けない。
 
-この変換をユーザーに強制する（`z.coerce` を常に使わせる）のではなく、フレームワーク側で `z.preprocess()` を使って自動的に文字列→型変換を行う。
+tskm には Zod の `z.coerce` / `z.preprocess` に相当する仕組みが無い。そこでこの変換をユーザーに強制するのではなく、フレームワーク側で parse の前に自動的に文字列→型変換を行う。スキーマの型は判別子 `schema.type` で判定する（`pipe(number(), ...)` も `...schema` の spread で `type` を保持するため pipe 後も判定可能）。
 
 ```mermaid
 flowchart LR
   raw["生の値<br/>（文字列）"]
-  preprocess["z.preprocess()<br/>文字列→型変換"]
-  schema["ユーザーの<br/>Zod スキーマ"]
+  coerce["coerceValue()<br/>文字列→型変換"]
+  schema["parse(object(shape))<br/>tskm スキーマ"]
   result["型付きの値"]
 
-  raw --> preprocess --> schema --> result
+  raw --> coerce --> schema --> result
 ```
 
 ### 変換ルール
 
-| スキーマの型    | 文字列からの変換                              | 非文字列     |
-| --------------- | --------------------------------------------- | ------------ |
-| `z.boolean()`   | `"true"` / `"1"` → `true`、それ以外 → `false` | そのまま通す |
-| `z.number()`    | `Number()` で変換                             | そのまま通す |
-| `z.string()` 等 | ラップしない（変換不要）                      | —            |
+| スキーマの型  | 文字列からの変換                              | 非文字列     |
+| ------------- | --------------------------------------------- | ------------ |
+| `boolean()`   | `"true"` / `"1"` → `true`、それ以外 → `false` | そのまま通す |
+| `number()`    | `Number()` で変換                             | そのまま通す |
+| `string()` 等 | 変換しない                                    | —            |
 
 > [!NOTE]
-> `z.coerce.number()` を使っている場合でも `z.preprocess()` のラップは適用される。`Number("3000")` → `3000` → `z.coerce.number()` が受け取る。coerce は数値をそのまま通すので、冪等であり問題にならない。
+> 非文字列の値（config ファイルの `number` / `boolean`、ユーザー定義の `default` 値）はそのまま通す。これにより、どのソースから来た値も同じ tskm スキーマで一貫して検証される。
 
 ## Plugin — プラグイン解決
 
@@ -240,7 +240,7 @@ flowchart LR
 
 ### `serve -p 3000 -v`
 
-serve コマンド定義: `port` は `z.coerce.number()`、`host` は `z.string()`、`verbose` は `z.boolean()`
+serve コマンド定義: `port` は `pipe(number(), minValue(1), maxValue(65535))`、`host` は `string()`、`verbose` は `boolean()`
 
 | Stage         | 処理                                                                                       | 結果                                                 |
 | ------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
@@ -251,12 +251,12 @@ serve コマンド定義: `port` は `z.coerce.number()`、`host` は `z.string(
 
 ### `serve -p a3000`（バリデーションエラー）
 
-| Stage         | 処理                                                                          | 結果                                                 |
-| ------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------- |
-| **Router**    | `"serve"` → `serve.ts` にマッチ                                               | remainingTokens: `["-p", "a3000"]`                   |
-| **Parser**    | `-p` → `port`                                                                 | flags: `{port: ["a3000"]}`                           |
-| **Resolver**  | `port`: CLI フラグ `"a3000"`、`host`: default、`verbose`: default             | `{port: "a3000", host: "localhost", verbose: false}` |
-| **Validator** | `port`: `Number("a3000")` → `NaN` → `z.coerce.number()` が `NaN` をリジェクト | ZodError → stderr にエラー + ヘルプ表示、exit 1      |
+| Stage         | 処理                                                                 | 結果                                                 |
+| ------------- | -------------------------------------------------------------------- | ---------------------------------------------------- |
+| **Router**    | `"serve"` → `serve.ts` にマッチ                                      | remainingTokens: `["-p", "a3000"]`                   |
+| **Parser**    | `-p` → `port`                                                        | flags: `{port: ["a3000"]}`                           |
+| **Resolver**  | `port`: CLI フラグ `"a3000"`、`host`: default、`verbose`: default    | `{port: "a3000", host: "localhost", verbose: false}` |
+| **Validator** | `port`: `Number("a3000")` → `NaN` → `number()` が `NaN` をリジェクト | TskmError → stderr にエラー + ヘルプ表示、exit 1     |
 
 ### `MYAPP_SERVE_PORT=9090 serve`（環境変数・autoEnv）
 

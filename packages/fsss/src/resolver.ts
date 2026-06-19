@@ -83,7 +83,7 @@ function resolveValues(input: ResolverInput): Record<string, unknown> {
     }
 
     // どのソースからも値が見つからない → undefined のまま
-    // Zod がバリデーションエラーにする
+    // tskm がバリデーションエラーにする
   }
 
   return result;

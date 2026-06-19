@@ -1,11 +1,11 @@
 import { defineCommand } from "@miyaoka/fsss";
-import { z } from "zod";
+import { string } from "@tskm/core";
 
 export default defineCommand({
   description: "Say hello",
   args: {
     name: {
-      type: z.string(),
+      type: string(),
       description: "Name",
       positional: true,
     },

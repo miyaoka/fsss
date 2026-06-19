@@ -1,16 +1,16 @@
 import { defineCommand } from "@miyaoka/fsss";
-import { z } from "zod";
+import { string } from "@tskm/core";
 
 export default defineCommand({
   description: "Set a config value",
   args: {
     key: {
-      type: z.string(),
+      type: string(),
       description: "Config key",
       positional: true,
     },
     value: {
-      type: z.string(),
+      type: string(),
       description: "Config value",
       positional: true,
     },

@@ -2,36 +2,36 @@
   "name": "@miyaoka/fsss",
   "version": "0.6.0",
   "description": "A CLI framework where your file structure becomes your command structure, and a single schema gives you typed values whether they come from flags, env vars, or config files.",
-  "type": "module",
-  "author": "miyaoka",
+  "keywords": [
+    "bun",
+    "cli",
+    "file-based-routing",
+    "framework",
+    "tskm",
+    "typescript"
+  ],
+  "bugs": "https://github.com/miyaoka/fsss/issues",
   "license": "MIT",
+  "author": "miyaoka",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/miyaoka/fsss.git"
   },
-  "bugs": "https://github.com/miyaoka/fsss/issues",
-  "keywords": [
-    "cli",
-    "framework",
-    "file-based-routing",
-    "zod",
-    "bun",
-    "typescript"
-  ],
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "bin": {
     "fsss-codegen": "./dist/codegen.js"
   },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "prepack": "cp ../../README.md .",
     "postpack": "rm README.md",
@@ -43,18 +43,18 @@
     "lint": "oxlint --type-aware .",
     "fix": "oxlint --type-aware --fix . && oxfmt ."
   },
-  "peerDependencies": {
-    "zod": "^4.0.0"
-  },
   "devDependencies": {
     "@tsconfig/node24": "catalog:",
+    "@tskm/core": "catalog:",
     "@types/bun": "catalog:",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
     "oxlint-tsgolint": "catalog:",
     "typescript": "catalog:",
     "unplugin-dts": "catalog:",
-    "vite": "catalog:",
-    "zod": "catalog:"
+    "vite": "catalog:"
+  },
+  "peerDependencies": {
+    "@tskm/core": "^0.2.0"
   }
 }

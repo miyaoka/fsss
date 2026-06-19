@@ -1,20 +1,20 @@
-import type { z, ZodType } from "zod";
+import type { BaseSchema, InferOutput } from "@tskm/core";
 
 // --- 個々の arg 定義 ---
 
-interface ArgDefBase<T extends ZodType> {
+interface ArgDefBase<T extends BaseSchema<unknown, unknown>> {
   type: T;
   description: string;
   alias?: string;
   positional?: boolean;
-  default?: z.output<T>;
+  default?: InferOutput<T>;
   env?: string;
   config?: string;
   multiple?: boolean;
 }
 
 // 外部から参照する場合の非ジェネリクス版
-type ArgDef = ArgDefBase<ZodType>;
+type ArgDef = ArgDefBase<BaseSchema<unknown, unknown>>;
 
 // ユーザーが定義する args オブジェクトの型
 type ArgsDefs = Record<string, ArgDef>;
@@ -22,7 +22,9 @@ type ArgsDefs = Record<string, ArgDef>;
 // --- args 定義から推論される解決済みの値の型 ---
 
 type InferArgs<T extends ArgsDefs> = {
-  [K in keyof T]: T[K]["multiple"] extends true ? z.output<T[K]["type"]>[] : z.output<T[K]["type"]>;
+  [K in keyof T]: T[K]["multiple"] extends true
+    ? InferOutput<T[K]["type"]>[]
+    : InferOutput<T[K]["type"]>;
 };
 
 // --- params の型 ---

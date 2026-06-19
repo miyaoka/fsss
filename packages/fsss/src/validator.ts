@@ -1,54 +1,53 @@
-import { z } from "zod";
+import { array, type BaseSchema, object, parse } from "@tskm/core";
 import type { ArgsDefs } from "./types";
-import { isBooleanSchema, isNumberSchema } from "./zod-utils";
+import { isBooleanSchema, isNumberSchema } from "./schema-utils";
 
-// CLI フラグ・環境変数は文字列で入ってくるため、
-// Zod スキーマに渡す前にフレームワーク側で型変換する。
-// z.preprocess() でスキーマをラップし、文字列→適切な型への変換を行う。
-// @julr/vite-plugin-validate-env と同じアプローチ。
+// CLI フラグ・環境変数は文字列で入ってくる。tskm には z.coerce / z.preprocess 相当が
+// 無いため、parse に渡す前にフレームワーク側で文字列→適切な型へ変換する。
+// 文字列以外（config ファイルの値・default 値）はそのまま通す。
 
-function wrapWithStringPreprocess(schema: z.ZodType): z.ZodType {
+function coerceValue(schema: BaseSchema<unknown, unknown>, value: unknown): unknown {
+  if (typeof value !== "string") {
+    return value;
+  }
   if (isBooleanSchema(schema)) {
-    return z.preprocess((value) => {
-      if (typeof value !== "string") {
-        return value;
-      }
-      return value === "true" || value === "1";
-    }, schema);
+    return value === "true" || value === "1";
   }
-
   if (isNumberSchema(schema)) {
-    return z.preprocess((value) => {
-      if (typeof value !== "string") {
-        return value;
-      }
-      return Number(value);
-    }, schema);
+    return Number(value);
   }
-
   // string やその他のスキーマはそのまま
-  return schema;
+  return value;
 }
 
 function validateArgs(
   argsDefs: ArgsDefs,
   rawValues: Record<string, unknown>,
 ): Record<string, unknown> {
-  // arg 定義の type フィールドから z.object() を動的構築
-  // 各スキーマを z.preprocess() でラップして文字列→型変換を自動化
-  const shape: Record<string, z.ZodType> = {};
+  // arg 定義の type フィールドから object スキーマを動的構築する。
+  // 各値は事前に文字列→型変換してから parse に渡す。
+  const shape: Record<string, BaseSchema<unknown, unknown>> = {};
+  const values: Record<string, unknown> = {};
 
   for (const [name, def] of Object.entries(argsDefs)) {
-    const wrapped = wrapWithStringPreprocess(def.type);
+    const present = name in rawValues;
+
     if (def.multiple === true) {
-      shape[name] = z.array(wrapped);
+      shape[name] = array(def.type);
+      if (present) {
+        const raw = rawValues[name];
+        values[name] = Array.isArray(raw) ? raw.map((v) => coerceValue(def.type, v)) : raw;
+      }
       continue;
     }
-    shape[name] = wrapped;
+
+    shape[name] = def.type;
+    if (present) {
+      values[name] = coerceValue(def.type, rawValues[name]);
+    }
   }
 
-  const schema = z.object(shape);
-  return schema.parse(rawValues);
+  return parse(object(shape), values) as Record<string, unknown>;
 }
 
 export { validateArgs };

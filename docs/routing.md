@@ -113,10 +113,13 @@ Web フレームワークの `req.params` と `req.query` の分離と同じ構�
 
 ```ts
 // commands/remote/[name]/push.ts
+import { defineCommand } from "@miyaoka/fsss";
+import { boolean, string } from "@tskm/core";
+
 export default defineCommand({
   args: {
-    branch: { type: z.string(), positional: true, description: "ブランチ名" },
-    force: { type: z.boolean(), default: false, description: "強制プッシュ", alias: "f" },
+    branch: { type: string(), positional: true, description: "ブランチ名" },
+    force: { type: boolean(), default: false, description: "強制プッシュ", alias: "f" },
   },
   run({ params, args }) {
     params.name; // "origin" — ルーターが [name] から抽出

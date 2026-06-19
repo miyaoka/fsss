@@ -1,5 +1,5 @@
 import { relative, resolve } from "node:path";
-import { ZodError } from "zod";
+import { isTskmError } from "@tskm/core";
 import { loadMergedConfig } from "./config";
 import {
   generateDefaultCommandHelp,
@@ -14,7 +14,7 @@ import { resolveValues } from "./resolver";
 import { resolveRoute } from "./router";
 import type { ArgsDefs, CommandConfig, MiddlewareContext } from "./types";
 import { validateArgs } from "./validator";
-import { isBooleanSchema } from "./zod-utils";
+import { isBooleanSchema } from "./schema-utils";
 
 interface AutoEnvConfig {
   prefix: string;
@@ -262,16 +262,17 @@ function createCLI(options: CLIOptions): CLI {
       });
       args = validateArgs(argsDefs, rawValues);
     } catch (error) {
-      if (error instanceof ZodError) {
+      if (isTskmError(error)) {
         // ユーザーが何も入力していない（ルートの index.ts にフォールバック） → ヘルプを表示して正常終了
         if (tokens.length === 0) {
           console.log(helpText);
           return;
         }
 
-        const errorMessages = error.issues.map(
-          (issue) => `${issue.path.join(".")}: ${issue.message}`,
-        );
+        const errorMessages = error.issues.map((issue) => {
+          const path = issue.path?.map((segment) => String(segment.key)).join(".") ?? "";
+          return `${path}: ${issue.message}`;
+        });
         console.error(generateValidationErrorHelp(helpText, errorMessages));
         process.exit(EXIT_CODE_ERROR);
       }

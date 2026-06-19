@@ -7,24 +7,24 @@
 ```ts
 // commands/serve.ts
 import { defineCommand } from "@miyaoka/fsss";
-import { z } from "zod";
+import { boolean, maxValue, minValue, number, pipe, string } from "@tskm/core";
 
 export default defineCommand({
   description: "サーバーを起動する",
   args: {
     port: {
-      type: z.coerce.number().min(1).max(65535),
+      type: pipe(number(), minValue(1), maxValue(65535)),
       description: "ポート番号",
       alias: "p",
       default: 3000,
     },
     host: {
-      type: z.string(),
+      type: string(),
       description: "ホスト名",
       default: "localhost",
     },
     verbose: {
-      type: z.boolean(),
+      type: boolean(),
       description: "詳細ログ",
       alias: "v",
       default: false,
@@ -43,7 +43,7 @@ export default defineCommand({
 
 | フィールド    | 必須 | 説明                                                                    |
 | ------------- | ---- | ----------------------------------------------------------------------- |
-| `type`        | ✓    | Zod スキーマ。型変換とバリデーションを担う                              |
+| `type`        | ✓    | tskm スキーマ。型変換とバリデーションを担う                             |
 | `description` | ✓    | ヘルプに表示される説明文                                                |
 | `alias`       |      | 短縮フラグ（`-p` 等）                                                   |
 | `positional`  |      | `true` なら位置引数として扱う                                           |
@@ -67,12 +67,14 @@ config file     { "serve": { "port": 4000 } }
                     ↓ なければ
 default         3000
                     ↓
-                z.coerce.number().min(1).max(65535).parse(解決された値)
+                フレームワークが文字列→型変換（"5000" → 5000）
+                    ↓
+                parse(pipe(number(), minValue(1), maxValue(65535)), 解決された値)
                     ↓
                 args.port: number     型付きの値がハンドラに届く
 ```
 
-どのソースから来た値も、最終的に同じ Zod スキーマでバリデーションされる。`z.coerce` により、環境変数の文字列 `"5000"` も自動的に `number` に変換される。
+どのソースから来た値も、最終的に同じ tskm スキーマでバリデーションされる。tskm には `z.coerce` 相当が無いため、フレームワーク側が parse の前に文字列→型変換を行う。これにより環境変数の文字列 `"5000"` も自動的に `number` に変換される。
 
 ## ヘルプ自動生成
 

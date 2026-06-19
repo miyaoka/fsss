@@ -1,16 +1,16 @@
 import { defineCommand } from "@miyaoka/fsss";
-import { z } from "zod";
+import { boolean, string } from "@tskm/core";
 
 export default defineCommand({
   description: "Run production build",
   args: {
     outDir: {
-      type: z.string(),
+      type: string(),
       description: "Output directory",
       default: "dist",
     },
     minify: {
-      type: z.boolean(),
+      type: boolean(),
       description: "Enable minification",
       default: true,
     },

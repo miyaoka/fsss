@@ -4,7 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/@miyaoka/fsss)](https://www.npmjs.com/package/@miyaoka/fsss)
 [![license](https://img.shields.io/npm/l/@miyaoka/fsss)](https://github.com/miyaoka/fsss/blob/main/LICENSE)
 
-**fsss** — "File Structure, Single Schema" — bun + TypeScript + Zod
+**fsss** — "File Structure, Single Schema" — bun + TypeScript + tskm
 
 > ファイル構造がそのままコマンド構造になり、スキーマを一回書けば CLI フラグ・環境変数・設定ファイルのどこから値が来ても同じように型付きで受け取れる CLI フレームワーク
 >
@@ -12,10 +12,10 @@
 
 ## Install
 
-`zod` を peer dependency として要求するため、本体と一緒にインストールする。
+`@tskm/core` を peer dependency として要求するため、本体と一緒にインストールする。
 
 ```sh
-pnpm add @miyaoka/fsss zod
+pnpm add @miyaoka/fsss @tskm/core
 ```
 
 ## File Structure — ファイルを置くだけでコマンドが生える
@@ -37,17 +37,20 @@ commands/
 
 ```ts
 // commands/serve.ts
+import { defineCommand } from "@miyaoka/fsss";
+import { maxValue, minValue, number, pipe, string } from "@tskm/core";
+
 export default defineCommand({
   description: "サーバーを起動する",
   args: {
     port: {
-      type: z.coerce.number().min(1).max(65535),
+      type: pipe(number(), minValue(1), maxValue(65535)),
       description: "ポート番号",
       alias: "p",
       default: 3000,
     },
     host: {
-      type: z.string(),
+      type: string(),
       description: "ホスト名",
       default: "localhost",
     },
@@ -68,7 +71,7 @@ config file     { "serve": { "port": 4000 } }     ← コマンドツリーと�
 default         3000
 ```
 
-どのソースから来た値も、最終的に同じ Zod スキーマでバリデーションされる。
+どのソースから来た値も、最終的に同じ tskm スキーマでバリデーションされる。
 
 ### 環境変数の自動マッピング
 

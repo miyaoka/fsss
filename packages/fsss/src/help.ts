@@ -1,7 +1,7 @@
 import { deriveEnvName } from "./auto-mapping";
 import type { AvailableEntry } from "./router";
 import type { ArgDef, ArgsDefs } from "./types";
-import { isBooleanSchema } from "./zod-utils";
+import { isBooleanSchema } from "./schema-utils";
 
 interface HelpConfig {
   programName: string;
