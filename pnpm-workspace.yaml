@@ -16,7 +16,7 @@ catalog:
   oxlint: 1.71.0
   oxlint-tsgolint: 0.23.0
   typescript: 6.0.3
-  unplugin-dts: 1.0.2
+  unplugin-dts: 1.0.3
   vite: 8.1.0
   zod: 4.4.3
 
