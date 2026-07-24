@@ -19,7 +19,7 @@
     "@tsconfig/node24": "catalog:",
     "@types/node": "catalog:",
     "@typescript/native-preview": "catalog:",
-    "bumpp": "11.1.0",
+    "bumpp": "12.0.0",
     "lefthook": "2.1.10",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
