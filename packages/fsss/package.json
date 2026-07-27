@@ -30,16 +30,20 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "scripts": {
     "prepack": "cp ../../README.md .",
     "postpack": "rm README.md",
-    "prepare": "vite build",
-    "build": "vite build",
-    "dev": "vite build --watch",
+    "prepare": "pnpm run build",
+    "build": "rm -rf dist && vite build && pnpm run build:dts",
+    "build:dts": "tsc --emitDeclarationOnly --incremental false",
+    "dev": "rm -rf dist && pnpm run --workspace-concurrency=Infinity \"/^dev:/\"",
+    "dev:js": "vite build --watch",
+    "dev:dts": "pnpm run build:dts --watch --preserveWatchOutput",
     "test": "bun test",
-    "typecheck": "tsgo --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tests/tsconfig.json",
     "lint": "oxlint --type-aware .",
     "fix": "oxlint --type-aware --fix . && oxfmt ."
   },
@@ -53,7 +57,6 @@
     "oxlint": "catalog:",
     "oxlint-tsgolint": "catalog:",
     "typescript": "catalog:",
-    "unplugin-dts": "catalog:",
     "vite": "catalog:",
     "zod": "catalog:"
   }

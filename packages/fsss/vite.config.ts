@@ -1,5 +1,4 @@
 import { resolve } from "node:path";
-import dts from "unplugin-dts/vite";
 import { defineConfig } from "vite";
 
 const isWatch = process.argv.includes("--watch");
@@ -14,10 +13,11 @@ export default defineConfig({
       formats: ["es"],
     },
     outDir: "dist",
+    // .d.ts は tsc が別プロセスで同じ dist に出力するため、vite 側で消すと watch 中に消える
+    emptyOutDir: false,
     watch: isWatch ? { include: ["src/**/*"] } : null,
     rollupOptions: {
       external: ["zod", /^node:/],
     },
   },
-  plugins: [dts({ exclude: ["**/*.test.ts"] })],
 });

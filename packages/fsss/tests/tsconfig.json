@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
+    "tsBuildInfoFile": "../node_modules/.tmp/tests.tsbuildinfo",
     "declaration": false,
     "declarationMap": false,
     "rootDir": "..",

@@ -9,7 +9,7 @@
   "scripts": {
     "prepare": "fsss-codegen --commandsDir src/commands --outDir src",
     "cli": "bun run src/index.ts",
-    "typecheck": "tsgo --noEmit",
+    "typecheck": "tsc --noEmit",
     "lint": "oxlint --type-aware .",
     "fix": "oxlint --type-aware --fix . && oxfmt ."
   },
