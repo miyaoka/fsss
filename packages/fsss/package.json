@@ -42,7 +42,7 @@
     "dev:js": "vite build --watch",
     "dev:dts": "pnpm run build:dts --watch --preserveWatchOutput",
     "test": "bun test",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tests/tsconfig.json",
     "lint": "oxlint --type-aware .",
     "fix": "oxlint --type-aware --fix . && oxfmt ."
   },
