@@ -39,7 +39,7 @@
     "prepare": "pnpm run build",
     "build": "rm -rf dist && vite build && pnpm run build:dts",
     "build:dts": "tsc --emitDeclarationOnly --incremental false",
-    "dev": "pnpm run --parallel \"/^dev:/\"",
+    "dev": "rm -rf dist && pnpm run --workspace-concurrency=Infinity \"/^dev:/\"",
     "dev:js": "vite build --watch",
     "dev:dts": "pnpm run build:dts --watch --preserveWatchOutput",
     "test": "bun test",
