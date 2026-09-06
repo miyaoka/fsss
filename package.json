@@ -16,7 +16,7 @@
     "prepare": "lefthook install"
   },
   "devDependencies": {
-    "bumpp": "12.2.2",
+    "bumpp": "12.3.0",
     "lefthook": "2.1.12",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
