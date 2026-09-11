@@ -10,8 +10,8 @@ catalogs:
       specifier: 24.0.5
       version: 24.0.5
     '@types/bun':
-      specifier: 1.4.0
-      version: 1.4.0
+      specifier: 1.4.2
+      version: 1.4.2
     oxfmt:
       specifier: 0.66.0
       version: 0.66.0
@@ -65,7 +65,7 @@ importers:
         version: 24.0.5
       '@types/bun':
         specifier: 'catalog:'
-        version: 1.4.0
+        version: 1.4.2
       oxfmt:
         specifier: 'catalog:'
         version: 0.66.0
@@ -93,7 +93,7 @@ importers:
         version: 24.0.5
       '@types/bun':
         specifier: 'catalog:'
-        version: 1.4.0
+        version: 1.4.2
       oxfmt:
         specifier: 'catalog:'
         version: 0.66.0
@@ -121,7 +121,7 @@ importers:
         version: 24.0.5
       '@types/bun':
         specifier: 'catalog:'
-        version: 1.4.0
+        version: 1.4.2
       oxfmt:
         specifier: 'catalog:'
         version: 0.66.0
@@ -142,7 +142,7 @@ importers:
         version: 24.0.5
       '@types/bun':
         specifier: 'catalog:'
-        version: 1.4.0
+        version: 1.4.2
       oxfmt:
         specifier: 'catalog:'
         version: 0.66.0
@@ -546,8 +546,8 @@ packages:
   '@tsconfig/node24@24.0.5':
     resolution: {integrity: sha512-DWC54fGPuhZgg3Ighg4Y/A/bA3ZdB5hnzAuv/MkQ/X85sVsBsMQxu8t7khutdYeiNksBbFdDyeqv1HSW2Zl8aA==}
 
-  '@types/bun@1.4.0':
-    resolution: {integrity: sha512-K+lZULY23vRgK/CfTjFIV+tyifaNdSMlPh9j+6mQ/cLfpOznLyAuzgV/JQysyECpkBQLVMSyvjlr2fBUSA9wFQ==}
+  '@types/bun@1.4.2':
+    resolution: {integrity: sha512-GimotNn7+ZV0uVArItBbriZsR1oNf0+WTzPkdcFrzShI7k2norL0uzEaJT8T33dWr7O/c9ZDuAFQrctKCi72oQ==}
 
   '@types/node@26.4.1':
     resolution: {integrity: sha512-k97ENvZWtvA6yqz5/FS6a7duDgOPEeOQOc2iKS/nY6mX6qJUKtLnWzQS+Xj6tXweyj6ZcTAK2Qecetnvi9nCLA==}
@@ -680,8 +680,8 @@ packages:
     engines: {node: ^22.18.0 || ^24.11.0 || >=26.0.0}
     hasBin: true
 
-  bun-types@1.4.0:
-    resolution: {integrity: sha512-iIKw23BspnQQYd3prITOBxeUsxBHnwzX6YJfGMuNOZzeNcMmVqzIIVGRm1l69ogaPQmb4wB6BN8mA5bE9YuC5Q==}
+  bun-types@1.4.2:
+    resolution: {integrity: sha512-bxV1FgK7yBIzjRe5zBozIM4Bem11ZJcCXSrjWRG3YWLt8yFDePu4cLjpebO8OvPeIE9trbyPF4fuj3Cia4Fj3w==}
 
   cac@7.0.0:
     resolution: {integrity: sha512-tixWYgm5ZoOD+3g6UTea91eow5z6AAHaho3g0V9CNSNb45gM8SmflpAc+GRd1InC4AqN/07Unrgp56Y94N9hJQ==}
@@ -1174,9 +1174,9 @@ snapshots:
 
   '@tsconfig/node24@24.0.5': {}
 
-  '@types/bun@1.4.0':
+  '@types/bun@1.4.2':
     dependencies:
-      bun-types: 1.4.0
+      bun-types: 1.4.2
 
   '@types/node@26.4.1':
     dependencies:
@@ -1256,7 +1256,7 @@ snapshots:
       verkit: 0.3.2
       yaml: 2.9.0
 
-  bun-types@1.4.0:
+  bun-types@1.4.2:
     dependencies:
       '@types/node': 26.4.1
 
