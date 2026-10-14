@@ -15,6 +15,6 @@ catalog:
   oxlint-tsgolint: 7.0.2004
   typescript: 7.0.2
   vite: 8.3.4
-  zod: 4.6.5
+  zod: 4.6.6
 
 minimumReleaseAge: 4320
