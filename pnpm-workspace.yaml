@@ -8,7 +8,7 @@ allowBuilds:
   unrs-resolver: true
 
 catalog:
-  '@tsconfig/node24': 24.0.6
+  '@tsconfig/node26': 26.0.0
   '@types/bun': 1.4.4
   oxfmt: 0.79.0
   oxlint: 1.94.0
