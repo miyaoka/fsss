@@ -6,9 +6,9 @@ settings:
 
 catalogs:
   default:
-    '@tsconfig/node24':
-      specifier: 24.0.6
-      version: 24.0.6
+    '@tsconfig/node26':
+      specifier: 26.0.2
+      version: 26.0.2
     '@types/bun':
       specifier: 1.4.4
       version: 1.4.4
@@ -60,9 +60,9 @@ importers:
         specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
-      '@tsconfig/node24':
+      '@tsconfig/node26':
         specifier: 'catalog:'
-        version: 24.0.6
+        version: 26.0.2
       '@types/bun':
         specifier: 'catalog:'
         version: 1.4.4
@@ -88,9 +88,9 @@ importers:
         specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
-      '@tsconfig/node24':
+      '@tsconfig/node26':
         specifier: 'catalog:'
-        version: 24.0.6
+        version: 26.0.2
       '@types/bun':
         specifier: 'catalog:'
         version: 1.4.4
@@ -116,9 +116,9 @@ importers:
         specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
-      '@tsconfig/node24':
+      '@tsconfig/node26':
         specifier: 'catalog:'
-        version: 24.0.6
+        version: 26.0.2
       '@types/bun':
         specifier: 'catalog:'
         version: 1.4.4
@@ -137,9 +137,9 @@ importers:
 
   packages/fsss:
     devDependencies:
-      '@tsconfig/node24':
+      '@tsconfig/node26':
         specifier: 'catalog:'
-        version: 24.0.6
+        version: 26.0.2
       '@types/bun':
         specifier: 'catalog:'
         version: 1.4.4
@@ -543,8 +543,8 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@tsconfig/node24@24.0.6':
-    resolution: {integrity: sha512-/SK4JuydRQLGSCq7+hbiQ8fdAVR4Suv5EcBvkIAG3zo3GbXQvGoSclz4olL12Ar4OpH8gwGYJ67P4wwQqBRxKw==}
+  '@tsconfig/node26@26.0.2':
+    resolution: {integrity: sha512-RIBSoNGQxUQ8r4hSrEzS6TrUneoKaCuX6BjL4zF3wqttGq2w06zCea4d8P1gRvM/HZyDT1FQJ8trZSyy/63oMg==}
 
   '@types/bun@1.4.4':
     resolution: {integrity: sha512-9wkRDXUXK124pEnAutE6n/l18j+i9GC5IAHK8TmX/2nlySETmky0OU6yL5U8pW1AoKh++AN9auDCr647BfurjQ==}
@@ -1183,7 +1183,7 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@tsconfig/node24@24.0.6': {}
+  '@tsconfig/node26@26.0.2': {}
 
   '@types/bun@1.4.4':
     dependencies:
