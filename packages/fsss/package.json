@@ -51,7 +51,7 @@
     "zod": "^4.0.0"
   },
   "devDependencies": {
-    "@tsconfig/node24": "catalog:",
+    "@tsconfig/node26": "catalog:",
     "@types/bun": "catalog:",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
