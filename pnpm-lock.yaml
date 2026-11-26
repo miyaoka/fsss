@@ -10,8 +10,8 @@ catalogs:
       specifier: 26.0.2
       version: 26.0.2
     '@types/bun':
-      specifier: 1.4.4
-      version: 1.4.4
+      specifier: 1.4.5
+      version: 1.4.5
     oxfmt:
       specifier: 0.79.0
       version: 0.79.0
@@ -65,7 +65,7 @@ importers:
         version: 26.0.2
       '@types/bun':
         specifier: 'catalog:'
-        version: 1.4.4
+        version: 1.4.5
       oxfmt:
         specifier: 'catalog:'
         version: 0.79.0
@@ -93,7 +93,7 @@ importers:
         version: 26.0.2
       '@types/bun':
         specifier: 'catalog:'
-        version: 1.4.4
+        version: 1.4.5
       oxfmt:
         specifier: 'catalog:'
         version: 0.79.0
@@ -121,7 +121,7 @@ importers:
         version: 26.0.2
       '@types/bun':
         specifier: 'catalog:'
-        version: 1.4.4
+        version: 1.4.5
       oxfmt:
         specifier: 'catalog:'
         version: 0.79.0
@@ -142,7 +142,7 @@ importers:
         version: 26.0.2
       '@types/bun':
         specifier: 'catalog:'
-        version: 1.4.4
+        version: 1.4.5
       oxfmt:
         specifier: 'catalog:'
         version: 0.79.0
@@ -570,8 +570,8 @@ packages:
   '@tybys/wasm-util@0.10.5':
     resolution: {integrity: sha512-dOGOPxlaNV+G046mZzN+9C0dAcQZeSKcXiVaM0TYy/LM4ttTmgSBDxYfovcYI8Em3+eAbiAYpvWLOv8+ZVRJKA==}
 
-  '@types/bun@1.4.4':
-    resolution: {integrity: sha512-9wkRDXUXK124pEnAutE6n/l18j+i9GC5IAHK8TmX/2nlySETmky0OU6yL5U8pW1AoKh++AN9auDCr647BfurjQ==}
+  '@types/bun@1.4.5':
+    resolution: {integrity: sha512-DpgwNI9z0L1S0gtb45QLCWgwCUcMLnsHYMJHQvpNj7erGiCGBvpggltAIeARrtobNMKMuy0UP7i56tKKgwFs/Q==}
 
   '@types/node@26.6.6':
     resolution: {integrity: sha512-MzQj+8Kx3XI40OmUAE6Qoh58ZMNstNNMwn2nfd3qWsfe7nDNSqJNzes4njhz6AHwrSHOffSLwXU6yb474Q4aog==}
@@ -704,8 +704,8 @@ packages:
     engines: {node: ^22.18.0 || ^24.11.0 || >=26.0.0}
     hasBin: true
 
-  bun-types@1.4.4:
-    resolution: {integrity: sha512-yjrJh5oGX7mMPKGd19YXyIjmEuj4G4zNC30bs7PM9Az7NQ3ndF3j6hbeRdvJTRQEhJ/FYQwW0a2moweEi2hMxQ==}
+  bun-types@1.4.5:
+    resolution: {integrity: sha512-ECHn+9dhL3wv0G6u0+7dQvrnaimXiRDxxerYBmhTaLyJEEuvTPWk2Fye3XIf5Y++JIIiHKfQw4Z7V5D8KuiXbg==}
 
   cac@7.1.0:
     resolution: {integrity: sha512-LMDU/U2yA4IPIY8KT0NsNPWEYZvAMkbgyspxJ6btJaYV+WMDOHAZCmB0lsTObiHaRS1V/ztKAl7+TSkTqXyeoA==}
@@ -1247,9 +1247,9 @@ snapshots:
       tslib: 2.9.1
     optional: true
 
-  '@types/bun@1.4.4':
+  '@types/bun@1.4.5':
     dependencies:
-      bun-types: 1.4.4
+      bun-types: 1.4.5
 
   '@types/node@26.6.6':
     dependencies:
@@ -1329,7 +1329,7 @@ snapshots:
       verkit: 0.4.1
       yaml: 2.9.1
 
-  bun-types@1.4.4:
+  bun-types@1.4.5:
     dependencies:
       '@types/node': 26.6.6
       undici-types: 8.12.4
