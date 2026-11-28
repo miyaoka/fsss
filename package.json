@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "bumpp": "12.3.0",
-    "lefthook": "2.2.2",
+    "lefthook": "2.2.3",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
     "oxlint-tsgolint": "catalog:"
